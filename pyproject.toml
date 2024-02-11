@@ -1,0 +1,161 @@
+[build-system]
+requires = [
+  "setuptools>=65.0.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gpsts"
+description="Geodesic path search for transition-states"
+version = "0.0.1"
+readme = "README.md"
+license = { text = "GPLv3" }
+authors = [{ name = "Evan Walter Clark Spotte-Smith", email = "espottesmith@gmail.com" }]
+maintainers = [{ name = "Evan Walter Clark Spotte-Smith", email = "espottesmith@gmail.com" }]
+keywords = [
+    "geometry",
+    "reaction",
+    "pathway",
+    "transition-state",
+    "chemistry",
+    "kinetics",
+    "science",
+    "mechanism",
+    "optimization",
+    "search",
+    "geodesic",
+    "Sella",
+    "Architector",
+    "complex",
+    "structure",
+    "molecule",
+    "material",
+    "workflow"
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.9, <3.13"
+dependencies = [
+    "ase>3.22.1", # for Atoms object and calculators
+    "pymatgen>=2024.2.8", # for structure manipulation
+    "openbabel>=3.1.1", # for molecule structure generation, pre-optimization, etc.
+    "monty>=2024.2.2", # miscellaneous Python utilities
+    "numpy>=1.25.0", # for array handling
+    "scipy>=1.5.0", # for scientific utilities
+    "networkx>=2.2", # for graph manipulations
+    "tblite[ase]>=0.3.0", # for access to xTB
+    "quacc>=0.6.5", # for high-throughput workflows
+    "architector>=0.0.10", # for molecular complex generation
+]
+
+[project.optional-dependencies]
+dev = ["black>=23.7.0", "codecov-cli>=0.4.1", "isort>=5.12.0", "pytest>=7.4.0", "pytest-cov>=3.0.0", "ruff>=0.0.285"]
+
+[tool.versioningit.vcs]
+method = "git"
+default-tag = "0.0.1"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+select = [
+  "B",      # flake8-bugbear
+  "C4",     # flake8-comprehensions
+  "D",      # pydocstyle
+  "E",      # pycodestyle error
+  "EXE",    # flake8-executable
+  "F",      # pyflakes
+  "FA",     # flake8-future-annotations
+  "FBT003", # boolean-positional-value-in-call
+  "FLY",    # flynt
+  "I",      # isort
+  "ICN",    # flake8-import-conventions
+  "ISC",    # flake8-implicit-str-concat
+  "PD",     # pandas-vet
+  "PERF",   # perflint
+  "PIE",    # flake8-pie
+  "PL",     # pylint
+  "PT",     # flake8-pytest-style
+  "PYI",    # flakes8-pyi
+  "Q",      # flake8-quotes
+  "RET",    # flake8-return
+  "RSE",    # flake8-raise
+  "RUF",    # Ruff-specific rules
+  "SIM",    # flake8-simplify
+  "SLOT",   # flake8-slots
+  "TCH",    # flake8-type-checking
+  "TID",    # tidy imports
+  "TID",    # flake8-tidy-imports
+  "UP",     # pyupgrade
+  "W",      # pycodestyle warning
+  "YTT",    # flake8-2020
+]
+ignore = [
+  "B023",    # Function definition does not bind loop variable
+  "B028",    # No explicit stacklevel keyword argument found
+  "B904",    # Within an except clause, raise exceptions with ...
+  "C408",    # unnecessary-collection-call
+  "D105",    # Missing docstring in magic method
+  "D205",    # 1 blank line required between summary line and description
+  "D212",    # Multi-line docstring summary should start at the first line
+  "PD901",   # pandas-df-variable-name
+  "PERF203", # try-except-in-loop
+  "PERF401", # manual-list-comprehension (TODO fix these or wait for autofix)
+  "PLR",     # pylint refactor
+  "PLW2901", # Outer for loop variable overwritten by inner assignment target
+  "PT013",   # pytest-incorrect-pytest-import
+  "PYI024",  # collections-named-tuple (TODO should maybe fix these)
+  "RUF012",  # Disable checks for mutable class args. This is a non-problem.
+  "SIM105",  # Use contextlib.suppress(OSError) instead of try-except-pass
+]
+isort.required-imports = ["from __future__ import annotations"]
+isort.split-on-trailing-comma = false
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**" = ["D"]
+"tasks.py" = ["D"]
+
+[tool.pytest.ini_options]
+addopts = "--durations=30 --quiet -r xXs --color=yes -p no:warnings --import-mode=importlib"
+
+[tool.coverage.run]
+parallel = true
+omit = []
+
+[tool.coverage.report]
+exclude_also = [
+  "@deprecated",
+  "@np.deprecate",
+  "def __repr__",
+  "except ImportError:",
+  "if 0:",
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+  "if self.debug:",
+  "if settings.DEBUG",
+  "if typing.TYPE_CHECKING:",
+  "pragma: no cover",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "show_plot",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+namespace_packages = true
+explicit_package_bases = true
+no_implicit_optional = false
+disable_error_code = "annotation-unchecked"
