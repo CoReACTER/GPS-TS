@@ -1,5 +1,21 @@
+#stdlib
+from typing import Any, List, Dict, Optional, Tuple, Union
+from pathlib import Path
+
+from monty.dev import requires
+
+# Molecule representations
+from ase import Atoms
+
+# For ORCA calculations with Sella optimizer
+from quacc.recipes.orca.core import static_job, ase_relax_job
+from sella import Sella
+
+import jobflow as jf
+
+
 @requires(Sella, "Sella must be installed. Refer to the quacc documentation.")
-def geodesic_path_flow(
+def path_static_flow(
     path_points: List[Atoms],
     charge: int = 0,
     spin_multiplicity: int = 1,

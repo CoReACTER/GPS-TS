@@ -1,3 +1,20 @@
+#stdlib
+from typing import Any, List, Dict, Optional, Tuple, Union
+import random
+
+# For reaction complex formation
+from architector import view_structures, convert_io_molecule
+import architector.io_arch_dock as io_arch_dock
+
+# For molecule representations
+from ase import Atoms
+from pymatgen.core.structure import Molecule
+from pymatgen.io.ase import AseAtomsAdaptor
+
+# Basic numeric/scientific python libraries
+import numpy as np
+
+
 def make_complex(
     core: Atoms,
     other: Atoms,
@@ -9,9 +26,7 @@ def make_complex(
     params['species_list'] = [convert_io_molecule(other)]
     params['species_location_method'] = 'targeted'
 
-    # TODO: what do I do when there are multiple attachment sites?
-    # Hack Architector?
-    
+    # TODO: make it possible to add multiple attachment sites
     params['targeted_indices_close'] = [reacting_atom_core, reacting_atom_other]
 
     binding = io_arch_dock.add_non_covbound_species(core, parameters=params)
@@ -66,7 +81,7 @@ def make_complexes(
     keep_intermediates = False
 ):
 
-    # TODO: are we managing charge and spin effectively
+    # TODO: are we managing charge and spin effectively?
 
     # Convert reactants and products to ase Atoms objects
     rcts = list()
