@@ -40,7 +40,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Chemistry",
     "Topic :: Scientific/Engineering :: Physics",
@@ -50,7 +50,7 @@ requires-python = ">=3.9, <3.13"
 dependencies = [
     "ase>3.22.1", # for Atoms object and calculators
     "pymatgen>=2024.2.8", # for structure manipulation
-    "openbabel>=3.1.1", # for molecule structure generation, pre-optimization, etc.
+    # "openbabel>=3.1.1", # for molecule structure generation, pre-optimization, etc.
     "monty>=2024.2.2", # miscellaneous Python utilities
     "numpy>=1.25.0", # for array handling
     "scipy>=1.5.0", # for scientific utilities
