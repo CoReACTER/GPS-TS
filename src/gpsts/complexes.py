@@ -97,7 +97,7 @@ def make_complexes(
             ratoms = convert_io_molecule(r)
 
         ratoms.charge = int(rct_charges.get(ir, 0))
-        ratoms.uhf = int(rct_spins.get(ir, 1) + 1)
+        ratoms.uhf = int(rct_spins.get(ir, 1) - 1)
         rcts.append(ratoms)
 
     pros = list()
@@ -109,7 +109,7 @@ def make_complexes(
             patoms = convert_io_molecule(p)
 
         patoms.charge = int(pro_charges.get(ip, 0))
-        patoms.uhf = int(pro_spins.get(ip, 1) + 1)
+        patoms.uhf = int(pro_spins.get(ip, 1) - 1)
         pros.append(patoms)
 
     entrance_complexes = list()
@@ -133,12 +133,12 @@ def make_complexes(
 
         ordering = [central_index]
         current_complex = central_mol
-        internal_mapping_entrance = {(central_index, i): i for i in range(len(central_mol))}
+        internal_mapping_entrance = {(central_index, i): i for i in range(len(central_mol.ase_atoms))}
         
         # Add one "ligand" (additional reactant) at a time
         # Right now, we add the largest first, then the smallest
         # Don't know if that's reasonable
-        for ii, rct in sorted(enumerate(rcts), key=lambda x: len(x[1])):
+        for ii, rct in sorted(enumerate(rcts), key=lambda x: len(x[1].ase_atoms)):
             if ii == central_index:
                 continue
 
@@ -207,10 +207,10 @@ def make_complexes(
 
         ordering = [central_index]
         current_complex = central_mol
-        internal_mapping_exit = {(central_index, i): i for i in range(len(central_mol))}
+        internal_mapping_exit = {(central_index, i): i for i in range(len(central_mol.ase_atoms))}
         
         # Add one "ligand" (additional reactant) at a time, 
-        for ii, pro in sorted(enumerate(pros), key=lambda x: len(x[1])):
+        for ii, pro in sorted(enumerate(pros), key=lambda x: len(x[1].ase_atoms)):
             if ii == central_index:
                 continue
 
