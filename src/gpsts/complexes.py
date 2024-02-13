@@ -5,6 +5,7 @@ import random
 # For reaction complex formation
 from architector import view_structures, convert_io_molecule
 import architector.io_arch_dock as io_arch_dock
+from architector.io_molecule import Molecule as ArchMol
 
 # For molecule representations
 from ase import Atoms
@@ -16,14 +17,14 @@ import numpy as np
 
 
 def make_complex(
-    core: Atoms,
-    other: Atoms,
+    core: ArchMol,
+    other: ArchMol,
     reacting_atom_core: int,
     reacting_atom_other: int,
     params: Dict = dict()  # Can pass any normal Architector param here
 ):
     
-    params['species_list'] = [convert_io_molecule(other)]
+    params['species_list'] = [other]
     params['species_location_method'] = 'targeted'
 
     # TODO: make it possible to add multiple attachment sites
@@ -35,7 +36,7 @@ def make_complex(
 
 
 def select_central_molecule(
-    molecules: List[Atoms], 
+    molecules: List[ArchMol], 
     reacting_atoms: Dict[int, List[int]]
 ):
     # Pick one molecule to be the center
@@ -60,7 +61,7 @@ def select_central_molecule(
                 central_index = ii
                 central_mol = mol
             elif len(react_atoms) == current_central_reacting_atoms:
-                if len(mol) > len(central_mol):
+                if len(mol.ase_atoms.get_chemical_symbols()) > len(central_mol.ase_atoms.get_chemical_symbols()):
                     central_index = ii
                     central_mol = mol
 
@@ -75,35 +76,40 @@ def make_complexes(
     reacting_atoms_products: Dict[int, List[int]],
     bonds_breaking: List[Tuple[Tuple[int, int], Tuple[int, int]]],
     bonds_forming: List[Tuple[Tuple[int, int], Tuple[int, int]]],
+    rct_charges: Dict[int, int] = dict(),
+    rct_spins: Dict[int, int] = dict(),
+    pro_charges: Dict[int, int] = dict(),
+    pro_spins: Dict[int, int] = dict(),
     reactant_core: Optional[int] = None,
     product_core: Optional[int] = None,
-    architector_params: Dict = dict(),
-    keep_intermediates = False
+    architector_params: Dict = dict()
 ):
 
     # TODO: are we managing charge and spin effectively?
 
     # Convert reactants and products to ase Atoms objects
     rcts = list()
-    for r in reactants:
+    for ir, r in enumerate(reactants):
         if isinstance(r, Molecule):
             ratoms = AseAtomsAdaptor.get_atoms(r)
-            ratoms.charge = int(r.charge)
-            ratoms.uhf = int(r.spin_multiplicity + 1)
+            ratoms = convert_io_molecule(ratoms)
         else:
-            ratoms = r
+            ratoms = convert_io_molecule(r)
 
+        ratoms.charge = int(rct_charges.get(ir, 0))
+        ratoms.uhf = int(rct_spins.get(ir, 1) + 1)
         rcts.append(ratoms)
 
     pros = list()
-    for p in products:
+    for ip, p in enumerate(products):
         if isinstance(p, Molecule):
             patoms = AseAtomsAdaptor.get_atoms(p)
-            patoms.charge = int(p.charge)
-            patoms.uhf = int(p.spin_multiplicity + 1)
+            patoms = convert_io_molecule(patoms)
         else:
-            patoms = p
+            patoms = convert_io_molecule(p)
 
+        patoms.charge = int(pro_charges.get(ip, 0))
+        patoms.uhf = int(pro_spins.get(ip, 1) + 1)
         pros.append(patoms)
 
     entrance_complexes = list()
@@ -117,7 +123,7 @@ def make_complexes(
         # TODO: Probably we can use CREST to get a conformer that's closest to the product(s)?
         entrance_complex = rcts[0]
         
-        new_mapping = {i: mapping[(0, i)] for i in range(len(entrance_complex))}
+        new_mapping = {i: mapping[(0, i)] for i in range(len(entrance_complex.ase_atoms))}
     else:
         if reactant_core is None:
             central_index, central_mol = select_central_molecule(rcts, reacting_atoms_reactants)
@@ -130,7 +136,7 @@ def make_complexes(
         internal_mapping_entrance = {(central_index, i): i for i in range(len(central_mol))}
         
         # Add one "ligand" (additional reactant) at a time
-        # Going largest to smallest
+        # Right now, we add the largest first, then the smallest
         # Don't know if that's reasonable
         for ii, rct in sorted(enumerate(rcts), key=lambda x: len(x[1])):
             if ii == central_index:
@@ -165,8 +171,6 @@ def make_complexes(
             current_complex = binding[0]
             for jj, kk in enumerate(range(len(internal_mapping_entrance), len(current_complex.ase_atoms))):
                 internal_mapping_entrance[(ii, jj)] = kk
-            if keep_intermediates:
-                intermediate_entrance.append(binding)
         
         entrance_complex = current_complex
         new_mapping = dict()
@@ -176,9 +180,11 @@ def make_complexes(
     if len(pros) == 1:
         exit_complex = pros[0]
 
+        ec_atoms = exit_complex.ase_atoms
+
         # Reorder atoms to match entrance complex
-        current_exit_species = exit_complex.get_chemical_symbols()
-        current_exit_coords = exit_complex.get_positions()
+        current_exit_species = ec_atoms.get_chemical_symbols()
+        current_exit_coords = ec_atoms.get_positions()
 
         species = [None] * len(current_exit_species)
         coords = np.zeros(current_exit_coords.shape)
@@ -187,7 +193,7 @@ def make_complexes(
             species[key] = current_exit_species[value[1]]  # With only one product, value[0] will be 0 in all cases
             coords[key] = current_exit_coords[value[1]]
 
-        new_exit_complex = Atoms(symbols=species, positions=coords)
+        new_exit_complex =  convert_io_molecule(Atoms(symbols=species, positions=coords))
         new_exit_complex.charge = exit_complex.charge
         new_exit_complex.uhf = exit_complex.uhf
         exit_complex = new_exit_complex
@@ -237,8 +243,6 @@ def make_complexes(
             current_complex = binding[0]
             for jj, kk in enumerate(range(len(internal_mapping_exit), len(current_complex.ase_atoms))):
                 internal_mapping_exit[(ii, jj)] = kk
-            if keep_intermediates:
-                intermediate_exit.append(binding)
 
         exit_complex = current_complex
         current_exit_species = exit_complex.ase_atoms.get_chemical_symbols()
@@ -256,7 +260,9 @@ def make_complexes(
         new_exit_complex.uhf = exit_complex.uhf
         exit_complex = new_exit_complex
 
-    if keep_intermediates:
-        return entrance_complex, exit_complex, {"entrance": intermediate_entrance, "exit": intermediate_exit}
-    else:
-        return entrance_complex, exit_complex, None
+    if isinstance(entrance_complex, ArchMol):
+        entrance_complex = entrance_complex.ase_atoms
+    if isinstance(exit_complex, ArchMol):
+        exit_complex = exit_complex.ase_atoms
+
+    return entrance_complex, exit_complex

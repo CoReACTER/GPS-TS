@@ -56,17 +56,39 @@ def test_select_central_molecule(molecules_2r1p):
     # Simple example: Diels-Alder reaction?
 
 
-def test_make_complexes_onerct_onepro():
+def test_make_complexes_onerct_onepro(molecules_1r1p):
+
+    rxn1_mapping = {(0, e): (0, i) for i, e in enumerate([8, 2, 5, 3, 4, 9, 0, 1, 7, 10, 6])}
+    rxn1_atoms_rct = {0: [3, 7]}
+    rxn1_atoms_pro = {0: [rxn1_mapping[(0, 3)], rxn1_mapping[(0, 7)]]}
+
+    rxn1_bonds_breaking = [((0, 3), (0, 7))]
+    rxn1_bonds_forming = list()
+
+    rxn1_ent_comp, rxn1_exit_comp = make_complexes(
+        molecules_1r1p["reactants"],
+        molecules_1r1p["products"],
+        rxn1_mapping,
+        rxn1_atoms_rct,
+        rxn1_atoms_pro,
+        rxn1_bonds_breaking,
+        rxn1_bonds_forming,
+        rct_charges={0: -1},
+        rct_spins={0: 1},
+        pro_charges={0: -1},
+        pro_spins={0: 1},
+    )
+
+    assert rxn1_ent_comp.get_chemical_symbols() == rxn1_exit_comp.get_chemical_symbols()
+
+
+def test_make_complexes_tworct_onepro(molecules_2r1p):
     pass
 
 
-def test_make_complexes_tworct_onepro():
+def test_make_complexes_tworct_twopro(molecules_2r2p):
     pass
 
 
-def test_make_complexes_tworct_twopro():
-    pass
-
-
-def test_make_complexes_onerct_threepro():
+def test_make_complexes_onerct_threepro(molecules_1r3p):
     pass
