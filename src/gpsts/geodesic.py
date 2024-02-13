@@ -1,3 +1,6 @@
+# n-dimensional arrays, etc.
+import numpy as np
+
 # Molecule representation
 from ase import Atoms
 
@@ -44,9 +47,6 @@ def construct_geodesic_path(
     path_atoms = list()
     for image in path:
         atoms = Atoms(symbols, image)
-        atoms.charge = entrance_complex.charge
-        atoms.uhf = entrance_complex.uhf
-
         path_atoms.append(atoms)
 
     return path_atoms
