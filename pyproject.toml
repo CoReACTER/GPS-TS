@@ -58,6 +58,7 @@ dependencies = [
     "tblite[ase]>=0.3.0", # for access to xTB
     "quacc>=0.6.5", # for high-throughput workflows
     "architector>=0.0.10", # for molecular complex generation
+    "mip >= 1.14", # for mixed-integer linear programming tasks
 ]
 
 [project.optional-dependencies]

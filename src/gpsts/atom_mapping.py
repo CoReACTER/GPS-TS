@@ -8,11 +8,11 @@ from typing import Dict, List, Optional, Tuple, Union
 import numpy as np
 from mip import BINARY, CBC, MINIMIZE, Model, xsum
 
-from mrnet.core.mol_entry import MoleculeEntry
+from pymatgen.analysis.graphs import MoleculeGraph
 
-__author__ = "Mingjian Wen"
+__author__ = "Mingjian Wen, Evan Spotte-Smith"
 __maintainer__ = "Mingjian Wen"
-__email__ = "mjwen@uh.edu"
+__email__ = "mjwen@uh.edu, espottesmith@gmail.com"
 __status__ = "Alpha"
 __date__ = "February 2024"
 
@@ -26,9 +26,9 @@ AtomMappingDict = Dict[int, int]
 # Get this working with MoleculeGraphs
 
 def get_reaction_atom_mapping(
-    reactants: List[MoleculeEntry],
-    products: List[MoleculeEntry],
-    max_bond_change: int = 10,
+    reactants: List[MoleculeGraph],
+    products: List[MoleculeGraph],
+    max_bond_change: int = 5,
     msg: bool = False,
     threads: int = 1,
 ) -> Tuple[List[AtomMappingDict], List[AtomMappingDict], int]:
@@ -37,8 +37,10 @@ def get_reaction_atom_mapping(
 
     This works for reactions with any number of reactant/product molecules, provided
     that the reaction is stoichiometrically balanced. This implementation respects atom
-    type and the connection between atoms, and ignore other information like bond type
+    type and the connection between atoms, and ignores other information like bond type
     (e.g. single vs double) as well and stereo centers.
+
+    TODO: Can we make this program respect stereochemistry?
 
     There could be multiple mappings (due to, e.g. symmetry in molecules and the fact
     that bond type is not considered), and this function only returns one such mapping.
@@ -49,15 +51,16 @@ def get_reaction_atom_mapping(
     the algorithm.
 
     Args:
-        reactants: reactant molecules
-        products: product molecules
-        max_bond_change: maximum number of allowed bond changes (break and form) between
-            the reactants and products.
-        msg: whether to show the integer programming solver running message to stdout.
-        threads: number of threads for the integer programming solver.
+        reactants (List[MoleculeGraph]): reactant molecules
+        products (List[MoleculeGraph]): product molecules
+        max_bond_change (int): maximum number of allowed bond changes (break and form) between
+            the reactants and products. (Default 5)
+        msg (bool): whether to show the integer programming solver running message to stdout.
+            (Default False)
+        threads (int): number of threads for the integer programming solver.
 
     Returns:
-        reactants_map_number: rdkit style atom map number for the reactant molecules
+        reactants_map_number: rdkit-style atom map number for the reactant molecules
             (starting from 1 in rdkit but from 0 here). Each dict holds the map number
             for one molecule {atom_index: map_number}. This should be used together
             with `products_map_number` to determine the correspondence of atoms.
@@ -89,10 +92,10 @@ def get_reaction_atom_mapping(
     rct_species = defaultdict(int)  # type: Dict[str, int]
     prdt_species = defaultdict(int)  # type: Dict[str, int]
     for m in reactants:
-        for s in m.species:
+        for s in m.molecule.species:
             rct_species[s] += 1
     for m in products:
-        for s in m.species:
+        for s in m.molecule.species:
             prdt_species[s] += 1
     if rct_species != prdt_species:
         raise ReactionMappingError(
@@ -104,7 +107,7 @@ def get_reaction_atom_mapping(
     # This only checks the number of bonds and thus actual num changes could be larger,
     # which will be checked later.
     num_bond_change = abs(
-        sum(len(m.bonds) for m in reactants) - sum(len(m.bonds) for m in products)
+        sum(len(set(m.graph.edges())) for m in reactants) - sum(len(set(m.graph.edges())) for m in products)
     )
     if num_bond_change > max_bond_change:
         raise ReactionMappingError(
@@ -188,7 +191,7 @@ def get_reaction_atom_mapping(
 
 
 def get_local_global_atom_index_mapping(
-    molecules: List[MoleculeEntry],
+    molecules: List[MoleculeGraph],
 ) -> Tuple[List[str], List[Bond], List[List[int]], List[Tuple[int, int]]]:
     """
     Map the local and global indices of atoms in a sequence of molecules.
@@ -225,26 +228,27 @@ def get_local_global_atom_index_mapping(
             global index 4 corresponds to atom 2 in molecule 0.
     """
 
-    global_species = []
-    global_bonds = []
+    global_species = list()
+    global_bonds = list()
 
-    local_to_global = []
-    global_to_local = []
+    local_to_global = list()
+    global_to_local = list()
 
     n = 0
     for i, m in enumerate(molecules):
-        global_species.extend(m.species)
+        num_atoms = len(m.molecule)
+        global_species.extend(m.molecule.species)
 
-        bonds = [(b[0] + n, b[1] + n) for b in m.bonds]
+        bonds = [(b[0] + n, b[1] + n) for b in set(m.graph.edges())]
         global_bonds.extend(bonds)
 
-        mp_l2g = [j + n for j in range(m.num_atoms)]
+        mp_l2g = [j + n for j in range(num_atoms)]
         local_to_global.append(mp_l2g)
 
-        mp_g2l = [(i, j) for j in range(m.num_atoms)]
+        mp_g2l = [(i, j) for j in range(num_atoms)]
         global_to_local.extend(mp_g2l)
 
-        n += m.num_atoms
+        n += num_atoms
 
     return global_species, global_bonds, local_to_global, global_to_local
 
@@ -334,6 +338,8 @@ def solve_integer_programing(
         for (k, l) in product_bonds:
             model += alpha_vars[(i, j, k, l)] <= y_vars[(i, k)] + y_vars[(i, l)]
             model += alpha_vars[(i, j, k, l)] <= y_vars[(j, k)] + y_vars[(j, l)]
+
+    # TODO: can we incorporate constraints 7-9
 
     # create objective
     obj1 = xsum(
