@@ -1,3 +1,7 @@
+# Copyright (c) CoReACTER.
+# Distributed under the terms of the GPL version 3.
+# Some code taken/heavily influences by https://github.com/virtualzx-nad/geodesic-interpolate
+
 # n-dimensional arrays, etc.
 import numpy as np
 
@@ -6,6 +10,13 @@ from ase import Atoms
 
 # For defining a reaction path geodesic using internal coordinates
 from geodesic_interpolate import redistribute, Geodesic
+
+
+__author__ = "Evan Spotte-Smith"
+__maintainer__ = "Evan Spotte-Smith"
+__email__ = "espottesmith@gmail.com"
+__status__ = "Alpha"
+__date__ = "February 2024"
 
 
 def construct_geodesic_path(

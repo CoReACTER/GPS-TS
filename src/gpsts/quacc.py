@@ -1,3 +1,6 @@
+# Copyright (c) CoReACTER.
+# Distributed under the terms of the GPL version 3.
+
 #stdlib
 from typing import Any, List, Dict, Optional, Tuple, Union
 from pathlib import Path
@@ -12,6 +15,13 @@ from quacc.recipes.orca.core import static_job, ase_relax_job
 from sella import Sella
 
 import jobflow as jf
+
+
+__author__ = "Evan Spotte-Smith"
+__maintainer__ = "Evan Spotte-Smith"
+__email__ = "espottesmith@gmail.com"
+__status__ = "Alpha"
+__date__ = "February 2024"
 
 
 @requires(Sella, "Sella must be installed. Refer to the quacc documentation.")

@@ -1,3 +1,6 @@
+# Copyright (c) CoReACTER.
+# Distributed under the terms of the GPL version 3.
+
 #stdlib
 from typing import Any, List, Dict, Optional, Tuple, Union
 import random
@@ -14,6 +17,13 @@ from pymatgen.io.ase import AseAtomsAdaptor
 
 # Basic numeric/scientific python libraries
 import numpy as np
+
+
+__author__ = "Evan Spotte-Smith"
+__maintainer__ = "Evan Spotte-Smith"
+__email__ = "espottesmith@gmail.com"
+__status__ = "Alpha"
+__date__ = "February 2024"
 
 
 def make_complex(
