@@ -22,9 +22,6 @@ Bond = Tuple[int, int]
 AtomMappingDict = Dict[int, int]
 
 
-# TODO: strip out need for MoleculeEntry
-# Get this working with MoleculeGraphs
-
 def get_reaction_atom_mapping(
     reactants: List[MoleculeGraph],
     products: List[MoleculeGraph],
