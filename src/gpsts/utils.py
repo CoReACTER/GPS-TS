@@ -1,14 +1,22 @@
-from typing import Any, Dict, List
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import numpy as np
+
+from openbabel import openbabel, pybel
 
 from ase import Atoms
 from ase.io import read
+
 from pymatgen.core.periodic_table import Element
 from pymatgen.io.ase import AseAtomsAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
 from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
 
 from gpsts.atom_mapping import get_reaction_atom_mapping
+
 
 METALS = [str(Element.from_Z(i)) for i in range(1, 87) if Element.from_Z(i).is_metal]
 
@@ -17,6 +25,10 @@ METAL_EDGE_EXTENDER_PARAMS = {
     "metals": METALS,
     "coordinators": ("O", "N", "S", "C", "P", "Se", "Si", "Ge", "As", "Cl", "B", "I", "Br", "Te", "F", "Sb"),
 }
+
+
+def split_complex_to_components():
+    pass
 
 
 def atoms_to_molecule_graph(
@@ -32,13 +44,80 @@ def atoms_to_molecule_graph(
     return mg
 
 
-def split_complex_to_components():
-    pass
+def read_adjacency_matrix(
+    file: str | Path,
+) -> np.ndarray:
+    if isinstance(file, str):
+        file = Path(file)
+
+    with open(file) as file_obj:
+        lines = file_obj.readlines()
+
+        dimension = len(lines[0].strip().split())
+        array = np.zeros((dimension, dimension))
+
+        for ir, line in enumerate(lines):
+            for ic, datum in enumerate(line.strip().split()):
+                array[ir, ic] = int(datum)
+    
+    return array
+
+
+def construct_molecule_from_adjacency_matrix(
+    initial_structure: Molecule,
+    matrix: np.ndarray,
+    optimization_steps: int = 500
+) -> Molecule:
+    
+    # Have to go through OpenBabel to make a reasonable structure based on bond orders
+    # This code is taken from pymatgen - thanks Shyue Ping Ong and Qi Wang
+    ob_mol = openbabel.OBMol()
+    ob_mol.BeginModify()
+    for site in initial_structure:
+        coords = list(site.coords)
+        atom_no = site.specie.Z
+        ob_atom = openbabel.OBAtom()
+        ob_atom.thisown = 0
+        ob_atom.SetAtomicNum(atom_no)
+        ob_atom.SetVector(*coords)
+        ob_mol.AddAtom(ob_atom)
+        del ob_atom
+
+    bonds = set()
+    # Extract unique bonds and bond orders from the adjacency matrix
+    # There must be some nicer way to do this, but this should be plenty fast for our purposes
+    for i in range(matrix.shape[0]):
+        for j in range(i):
+            if matrix[i, j] != 0:
+                bonds.add((j, i, matrix[i, j]))
+
+    # Add in bonds
+    # This will then be used to generate guess structures
+    for bond in bonds:
+        ob_mol.AddBond(
+            int(bond[0]) + 1,  # OpenBabel uses 1-based indexing
+            int(bond[1]) + 1,
+            int(bond[2]),
+            0,
+            -1
+        )
+    
+    pybelmol = pybel.Molecule(ob_mol)
+    pybelmol.localopt(forcefield="uff", steps=optimization_steps)
+    ob_mol = pybelmol.OBMol
+
+    # Move from partially optimized OpenBabel molecule to pymatgen Molecule
+    ad = BabelMolAdaptor(ob_mol)
+    output_mol = ad.pymatgen_mol
+    output_mol.set_charge_and_spin(initial_structure.charge, spin_multiplicity=initial_structure.spin_multiplicity) 
+    
+    return output_mol
 
 
 def prepare_reaction_for_input(
     rct_mgs: List[MoleculeGraph],
-    pro_mgs: List[MoleculeGraph]
+    pro_mgs: List[MoleculeGraph],
+    label: Optional[str] = None
 ) -> Dict[str, Any]:
 
     # Charges and spins
@@ -151,6 +230,7 @@ def prepare_reaction_for_input(
             reacting_atoms_products[pb[0]].append(pb[1])
 
     reaction_data = {
+        "label": label,
         "reactants": rct_mgs,
         "products": pro_mgs,
         "mapping": mapping,

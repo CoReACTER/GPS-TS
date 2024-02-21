@@ -1,6 +1,46 @@
 import pytest
 
-from gpsts.utils import atoms_to_molecule_graph, prepare_reaction_for_input
+from pymatgen.core.structure import Molecule
+from pymatgen.analysis.graphs import MoleculeGraph
+from pymatgen.analysis.local_env import OpenBabelNN
+
+from gpsts.utils import (
+    atoms_to_molecule_graph,
+    construct_molecule_from_adjacency_matrix,
+    prepare_reaction_for_input,
+    read_adjacency_matrix
+)
+
+
+def test_read_adjacency_matrix(test_dir):
+    file = test_dir / "mol_adj_matrix" / "adj_matrix"
+
+    matrix = read_adjacency_matrix(file)
+    assert matrix.shape == ((13, 13))
+    assert matrix[0, 0] == 0
+    assert matrix[0, 1] == 2
+    assert matrix[1, 0] == 2
+
+
+def test_construct_molecule_from_adjacency_matrix(test_dir):
+    adj_matrix = read_adjacency_matrix(test_dir / "mol_adj_matrix" / "adj_matrix")
+
+    bonds = set()
+    for i in range(adj_matrix.shape[0]):
+        for j in range(i):
+            if adj_matrix[i, j] != 0:
+                bonds.add((j, i))
+
+    mol = Molecule.from_file(test_dir / "mol_adj_matrix" / "initial_structure.xyz")
+
+    new_mol = construct_molecule_from_adjacency_matrix(mol, adj_matrix)
+    mg = MoleculeGraph.with_local_env_strategy(new_mol, OpenBabelNN())
+    mg_bonds = mg.graph.edges()
+
+    assert len(bonds) == len(mg_bonds)
+    
+    for bond in bonds:
+        assert (bond in mg_bonds or (bond[1], bond[0]) in mg_bonds)
 
 
 def test_prepare_reaction_for_input(molecules_1r1p, molecules_2r1p, molecules_2r2p):

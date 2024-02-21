@@ -37,7 +37,7 @@ def get_reaction_atom_mapping(
     type and the connection between atoms, and ignores other information like bond type
     (e.g. single vs double) as well and stereo centers.
 
-    TODO: Can we make this program respect stereochemistry?
+    TODO: Include stereochemical information
 
     There could be multiple mappings (due to, e.g. symmetry in molecules and the fact
     that bond type is not considered), and this function only returns one such mapping.

@@ -1,6 +1,7 @@
-import os
+import logging
 from glob import glob
 from pathlib import Path
+from typing import Any, Dict, List
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
@@ -30,7 +31,10 @@ def mg_from_bh9(path: Path) -> MoleculeGraph:
 
 def process_bh9(
     xyz_dir: str | Path
-):
+) -> List[Dict[str, Any]]:
+
+    logging.info(f"BEGINNING PROCESSING BH9 DATASET WITH ROOT DIRECTORY: {xyz_dir}")
+
     if isinstance(xyz_dir, str):
         xyz_dir = Path(xyz_dir)
 
@@ -42,6 +46,8 @@ def process_bh9(
 
     for ts_file in ts_files:
         rxn_id = ts_file.split("TS")[0]
+        
+        logging.info(f"\tProcessing reaction: {rxn_id}")
 
         ts_mol = Molecule.from_file(xyz_dir / ts_file)
 
@@ -57,6 +63,6 @@ def process_bh9(
             pro_path = xyz_dir / pro_file
             pro_mgs.append(mg_from_bh9(pro_path))
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"BH9:{rxn_id}"))
 
     return reaction_data
