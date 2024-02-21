@@ -1,19 +1,35 @@
 from typing import Any, Dict, List
 
 from ase import Atoms
+from ase.io import read
 from pymatgen.core.periodic_table import Element
+from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
 from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
 
+from gpsts.atom_mapping import get_reaction_atom_mapping
 
-METALS = [str(Element(i)) for i in range(1, 87) if Element(i).is_metal]
+METALS = [str(Element.from_Z(i)) for i in range(1, 87) if Element.from_Z(i).is_metal]
 
 METAL_EDGE_EXTENDER_PARAMS = {
     "cutoff": 2.7,
     "metals": METALS,
     "coordinators": ("O", "N", "S", "C", "P", "Se", "Si", "Ge", "As", "Cl", "B", "I", "Br", "Te", "F", "Sb"),
 }
+
+
+def atoms_to_molecule_graph(
+    atoms: Atoms,
+    charge: int = 0,
+    spin_multiplicity: int = 1,
+) -> MoleculeGraph:
+    atoms.charge = charge
+    atoms.spin_multiplicity = spin_multiplicity
+    mol = AseAtomsAdaptor.get_molecule(atoms)
+    mg = MoleculeGraph.with_local_env_strategy(mol, OpenBabelNN())
+    mg = metal_edge_extender(mg, **METAL_EDGE_EXTENDER_PARAMS)
+    return mg
 
 
 def split_complex_to_components():
@@ -44,7 +60,7 @@ def prepare_reaction_for_input(
         for aatomind, aindex in rct.items():
             match = False
 
-            for ip, pro in enumerate(pro_map_number):
+            for ip, pro in enumerate(prdt_map_number):
                 if match:
                     break
 
@@ -64,7 +80,7 @@ def prepare_reaction_for_input(
         inverse_mapping[b] = a
 
     # Sanity check
-    assert len(mapping) == len(ts_mol)
+    assert len(mapping) == sum([len(x.molecule) for x in rct_mgs])
 
     # Identifying broken and formed bonds
     bonds_rct = list()
@@ -74,7 +90,7 @@ def prepare_reaction_for_input(
     bonds_forming = list()
 
     for ii, mg in enumerate(rct_mgs):
-        for bond in mg.graph.bonds():
+        for bond in mg.graph.edges():
             bonds_rct.append(
                 (
                     (ii, bond[0]),
@@ -83,7 +99,7 @@ def prepare_reaction_for_input(
             )
 
     for ii, mg in enumerate(pro_mgs):
-        for bond in mg.graph.bonds():
+        for bond in mg.graph.edges():
             bonds_pro.append(
                 (
                     (ii, bond[0]),
@@ -144,7 +160,7 @@ def prepare_reaction_for_input(
         "bonds_forming": bonds_forming,
         "rct_charges": rct_charges,
         "rct_spins": rct_spins,
-        "pro_charge": pro_charges,
+        "pro_charges": pro_charges,
         "pro_spins": pro_spins
     }
     
