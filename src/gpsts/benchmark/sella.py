@@ -36,6 +36,8 @@ def process_sella_benchmark(
     for ts_file in ts_files:
         rxn_id = ts_file.split(".")[0]
 
+        logging.info(f"\tProcessing reaction: {rxn_id}")
+
         # Exclude some reactions that overlap with other datasets
         if int(rxn_id) in exclude:
             continue

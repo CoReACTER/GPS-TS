@@ -27,10 +27,6 @@ METAL_EDGE_EXTENDER_PARAMS = {
 }
 
 
-def split_complex_to_components():
-    pass
-
-
 def atoms_to_molecule_graph(
     atoms: Atoms,
     charge: int = 0,
