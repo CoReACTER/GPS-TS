@@ -58,11 +58,11 @@ def process_bh2o(
         # Construct molecule graphs
         rct = Molecule.from_file(xyz_dir / rct_file)
         rct.set_charge_and_spin(charge)
-        rct_mg = oxygen_edge_extender(Moleculegraph.with_local_env_strategy(rct, OpenBabelNN()))
+        rct_mg = oxygen_edge_extender(MoleculeGraph.with_local_env_strategy(rct, OpenBabelNN()))
         
         pro = Molecule.from_file(xyz_dir / pro_file)
         pro.set_charge_and_spin(charge)
-        pro_mg = oxygen_edge_extender(Moleculegraph.with_local_env_strategy(pro, OpenBabelNN()))
+        pro_mg = oxygen_edge_extender(MoleculeGraph.with_local_env_strategy(pro, OpenBabelNN()))
 
         # In some cases, there are multiple reactants or products - need to check for disconnected subgraphs
         rct_mgs = rct_mg.get_disconnected_fragments()
