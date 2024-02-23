@@ -40,8 +40,8 @@ def process_bh2o(
     xyz_dir: str | Path
 ) -> List[Dict[str, Any]]:
 
-    if isinstance(base_dir, str):
-        base_dir = Path(base_dir)
+    if isinstance(xyz_dir, str):
+        xyz_dir = Path(xyz_dir)
 
     logging.info(f"BEGINNING PROCESSING BH2O-36 DATASET WITH ROOT DIRECTORY: {xyz_dir}")
 
@@ -56,11 +56,11 @@ def process_bh2o(
         charge = int(rct_file.split(".")[0].split("_")[-1])
 
         # Construct molecule graphs
-        rct = Molecule.from_file(base_dir / rct_file)
+        rct = Molecule.from_file(xyz_dir / rct_file)
         rct.set_charge_and_spin(charge)
         rct_mg = oxygen_edge_extender(Moleculegraph.with_local_env_strategy(rct, OpenBabelNN()))
         
-        pro = Molecule.from_file(base_dir / pro_file)
+        pro = Molecule.from_file(xyz_dir / pro_file)
         pro.set_charge_and_spin(charge)
         pro_mg = oxygen_edge_extender(Moleculegraph.with_local_env_strategy(pro, OpenBabelNN()))
 
