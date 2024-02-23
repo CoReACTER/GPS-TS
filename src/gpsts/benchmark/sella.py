@@ -1,6 +1,7 @@
 import logging
 from glob import glob
 from pathlib import Path
+from typing import Any, Dict, List
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
