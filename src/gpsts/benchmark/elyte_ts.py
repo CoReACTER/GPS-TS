@@ -7,9 +7,12 @@ from monty.serialization import loadfn
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import oxygen_edge_extender, OpenBabelNN
+from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
 
-from gpsts.utils import prepare_reaction_for_input
+from gpsts.utils import (
+    prepare_reaction_for_input,
+    METAL_EDGE_EXTENDER_PARAMS
+)
 
 
 # From 10.1021/acs.jpclett.3c03279
@@ -161,7 +164,7 @@ REACTIONS_MESOSCALE = [
     # Part 5 - FEC
     {"reactants": ["LiFEC"], "products": ["LiFEC_RO"]},
     {"reactants": ["LiFEC_RO"], "products": ["LiF", "FEC_RO-LiF"]},
-    {"reactants": ["FEC_RO-LiF"], "products": ["CO2", "OCHCH2"]},
+    # {"reactants": ["FEC_RO-LiF"], "products": ["CO2", "OCHCH2"]},  # OCHCH2 missing from data
     {"reactants": ["FEC_RO-LiF_minus"], "products": ["CO2", "OCHCH2_minus"]},
     {"reactants": ["OCHCH2_minus", "FEC"], "products": ["tetrahedral_FEC_minus"]},
     # {"reactants": ["tetrahedral_FEC_minus"], "products": ["FEC_dimer_minus"], "barrier": 0.19},
@@ -446,7 +449,7 @@ def process_pf6(
         mgs[name] = mg
 
     # Generate reaction data
-    for reaction in REACTIONS_OX:
+    for reaction in REACTIONS_PF6:
         rxn_id = "+".join(reaction["reactants"]) + "->" + "+".join(reaction["products"])
 
         logging.info(f"\t\tProcessing reaction: {rxn_id}")
@@ -490,7 +493,7 @@ def process_mg(
         mgs[name] = mg
 
     # Generate reaction data
-    for reaction in REACTIONS_OX:
+    for reaction in REACTIONS_MG:
         rxn_id = "+".join(reaction["reactants"]) + "->" + "+".join(reaction["products"])
 
         logging.info(f"\t\tProcessing reaction: {rxn_id}")
@@ -520,18 +523,30 @@ def process_hiprgen(
 
     for rxn_id in REACTIONS_HIPRGEN:
         reaction = rxn_data[rxn_id]
+
+        logging.info(f"\t\tProcessing reaction: {rxn_id}")
         
         # Construct molecule graphs
         # For this dataset, automatically assigning charges to sub-molecule graphs is nontrivial
-        # For now, just don't break them down
+        # For now, just don't break them down (if not already broken down)
         # This will make this subset of the data somewhat easier - no complexes need to be made
-        rct_mg = MoleculeGraph.with_local_env_strategy(reaction["reactant"]["molecule"])
-        rct_mg = metal_edge_extender(rct_mg, **METAL_EDGE_EXTENDER_PARAMS)
-        
-        pro_mg = MoleculeGraph.with_local_env_strategy(reaction["product"]["molecule"])
-        pro_mg = metal_edge_extender(pro_mg, **METAL_EDGE_EXTENDER_PARAMS)
+        rct_mgs = list()
+        pro_mgs = list()
+        for mol in reaction["reactant"]["molecule"]:
+            rct_mg = MoleculeGraph.with_local_env_strategy(mol, OpenBabelNN())
+            rct_mg = metal_edge_extender(rct_mg, **METAL_EDGE_EXTENDER_PARAMS)
+            rct_mgs.append(rct_mg)
 
-        reaction_data.append(prepare_reaction_for_input([rct_mg], [pro_mg], label=f"ELYTE-TS:(HIPRGEN){rxn_id}"))
+        # Special case - dimerization with two identical reactants
+        if rxn_id == "carbene_dimerization":
+            rct_mgs.append(rct_mgs[0])
+        
+        for mol in reaction["product"]["molecule"]:
+            pro_mg = MoleculeGraph.with_local_env_strategy(mol, OpenBabelNN())
+            pro_mg = metal_edge_extender(pro_mg, **METAL_EDGE_EXTENDER_PARAMS)
+            pro_mgs.append(pro_mg)
+
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(HIPRGEN){rxn_id}"))
 
     return reaction_data
 
