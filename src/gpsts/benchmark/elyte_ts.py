@@ -185,148 +185,149 @@ REACTIONS_MESOSCALE = [
 
 
 # From 10.1021/acs.jpcc.2c06653
-REACTIONS_BORATE_ALUMINATE = [
-    # Ca_al_hfip_AlObreak
-    (("Ca_al_hfip_AlObreak", "struct1"), ("Ca_al_hfip_AlObreak", "struct2")),
-    (("Ca_al_hfip_AlObreak", "struct2"), ("Ca_al_hfip_AlObreak", "struct3")),
-    (("Ca_al_hfip_AlObreak", "struct3"), ("Ca_al_hfip_AlObreak", "struct4")),
-    # Ca_al_hfip_CObreak
-    (("Ca_al_hfip_CObreak", "struct1"), ("Ca_al_hfip_CObreak", "struct2")),
-    (("Ca_al_hfip_CObreak", "struct2"), ("Ca_al_hfip_CObreak", "struct3")),
-    # Ca_al_hftb_AlObreak
-    (("Ca_al_hftb_AlObreak", "struct1"), ("Ca_al_hftb_AlObreak", "struct2")),
-    (("Ca_al_hftb_AlObreak", "struct2"), ("Ca_al_hftb_AlObreak", "struct3")),
-    (("Ca_al_hftb_AlObreak", "struct3"), ("Ca_al_hftb_AlObreak", "struct4")),
-    # Ca_al_hftb_CFbreak
-    (("Ca_al_hftb_AlObreak", "struct1"), ("Ca_al_hftb_CFbreak", "struct2")),
-    # Ca_al_hftb_CObreak
-    (("Ca_al_hftb_CObreak", "struct1"), ("Ca_al_hftb_CObreak", "struct2")),
-    # Ca_al_pftb_AlObreak
-    (("Ca_al_pftb_AlObreak", "struct1"), ("Ca_al_pftb_AlObreak", "struct2")),
-    (("Ca_al_pftb_AlObreak", "struct2"), ("Ca_al_pftb_AlObreak", "struct3")),
-    (("Ca_al_pftb_AlObreak", "struct3"), ("Ca_al_pftb_AlObreak", "struct4")),
-    # Ca_al_pftb_CFbreak
-    (("Ca_al_pftb_CFbreak", "struct1"), ("Ca_al_pftb_CFbreak", "struct2")),
-    # Ca_al_pftb_CObreak
-    (("Ca_al_pftb_CObreak", "struct1"), ("Ca_al_pftb_CObreak", "struct2")),
-    # Ca_al_tfip_AlObreak
-    (("Ca_al_tfip_AlObreak", "struct1"), ("Ca_al_tfip_AlObreak", "struct2")),
-    (("Ca_al_tfip_AlObreak", "struct2"), ("Ca_al_tfip_AlObreak", "struct3")),
-    (("Ca_al_tfip_AlObreak", "struct3"), ("Ca_al_tfip_AlObreak", "struct4")),
-    # Ca_al_tfip_CObreak
-    (("Ca_al_tfip_CObreak", "struct1"), ("Ca_al_tfip_CObreak", "struct2")),
-    (("Ca_al_tfip_CObreak", "struct2"), ("Ca_al_tfip_CObreak", "struct3")),
-    # Ca_al_tftb_AlObreak
-    (("Ca_al_tftb_AlObreak", "struct1"), ("Ca_al_tftb_AlObreak", "struct2")),
-    (("Ca_al_tftb_AlObreak", "struct2"), ("Ca_al_tftb_AlObreak", "struct3")),
-    (("Ca_al_tftb_AlObreak", "struct3"), ("Ca_al_tftb_AlObreak", "struct4")),
-    # Ca_al_tftb_CObreak
-    (("Ca_al_tftb_CObreak", "struct1"), ("Ca_al_tftb_CObreak", "struct2")),
-    (("Ca_al_tftb_CObreak", "struct2"), ("Ca_al_tftb_CObreak", "struct3")),
-    # Ca_b_hfip_BObreak
-    (("Ca_b_hfip_BObreak", "struct1"), ("Ca_b_hfip_BObreak", "struct2")),
-    # Ca_b_hfip_CObreak
-    (("Ca_b_hfip_CObreak", "struct1"), ("Ca_b_hfip_CObreak", "struct2")),
-    (("Ca_b_hfip_CObreak", "struct2"), ("Ca_b_hfip_CObreak", "struct3")),
-    # Ca_b_hftb_BObreak
-    (("Ca_b_hftb_BObreak", "struct1"), ("Ca_b_hftb_BObreak", "struct2")),
-    # Ca_b_hftb_CFbreak
-    (("Ca_b_hftb_CFbreak", "struct1"), ("Ca_b_hftb_CFbreak", "struct2")),
-    # Ca_b_hftb_CObreak
-    (("Ca_b_hftb_CObreak", "struct1"), ("Ca_b_hftb_CObreak", "struct2")),
-    # Ca_b_pftb_BObreak
-    (("Ca_b_pftb_BObreak", "struct1"), ("Ca_b_pftb_BObreak", "struct2")),
-    (("Ca_b_pftb_BObreak", "struct2"), ("Ca_b_pftb_BObreak", "struct3")),
-    # Ca_b_pftb_CFbreak
-    (("Ca_b_pftb_CFbreak", "struct1"), ("Ca_b_pftb_CFbreak", "struct2")),
-    # Ca_b_pftb_CObreak
-    (("Ca_b_pftb_CObreak", "struct1"), ("Ca_b_pftb_CObreak", "struct2")),
-    # Ca_b_tfip_BObreak
-    (("Ca_b_tfip_BObreak", "struct1"), ("Ca_b_tfip_BObreak", "struct2")),
-    (("Ca_b_tfip_BObreak", "struct2"), ("Ca_b_tfip_BObreak", "struct3")),
-    # Ca_b_tfip_CObreak
-    (("Ca_b_tfip_CObreak", "struct1"), ("Ca_b_tfip_CObreak", "struct2")),
-    (("Ca_b_tfip_CObreak", "struct2"), ("Ca_b_tfip_CObreak", "struct3")),
-    # Ca_b_tftb_BObreak
-    (("Ca_b_tftb_BObreak", "struct1"), ("Ca_b_tftb_BObreak", "struct2")),
-    (("Ca_b_tftb_BObreak", "struct2"), ("Ca_b_tftb_BObreak", "struct3")),
-    (("Ca_b_tftb_BObreak", "struct3"), ("Ca_b_tftb_BObreak", "struct4")),
-    # Ca_b_tftb_CObreak
-    (("Ca_b_tftb_CObreak", "struct1"), ("Ca_b_tftb_CObreak", "struct2")),
-    (("Ca_b_tftb_CObreak", "struct2"), ("Ca_b_tftb_CObreak", "struct3")),
-    (("Ca_b_tftb_CObreak", "struct3"), ("Ca_b_tftb_CObreak", "struct4")),
-    # Mg_al_hfip_AlObreak
-    (("Mg_al_hfip_AlObreak", "struct1"), ("Mg_al_hfip_AlObreak", "struct2")),
-    (("Mg_al_hfip_AlObreak", "struct2"), ("Mg_al_hfip_AlObreak", "struct3")),
-    (("Mg_al_hfip_AlObreak", "struct3"), ("Mg_al_hfip_AlObreak", "struct4")),
-    # Mg_al_hfip_CObreak
-    (("Mg_al_hfip_CObreak", "struct1"), ("Mg_al_hfip_CObreak", "struct2")),
-    (("Mg_al_hfip_CObreak", "struct2"), ("Mg_al_hfip_CObreak", "struct3")),
-    # Mg_al_hftb_AlObreak
-    (("Mg_al_hftb_AlObreak", "struct1"), ("Mg_al_hftb_AlObreak", "struct2")),
-    (("Mg_al_hftb_AlObreak", "struct2"), ("Mg_al_hftb_AlObreak", "struct3")),
-    # Mg_al_hftb_CObreak
-    (("Mg_al_hftb_CObreak", "struct1"), ("Mg_al_hftb_CObreak", "struct2")),
-    (("Mg_al_hftb_CObreak", "struct2"), ("Mg_al_hftb_CObreak", "struct3")),
-    # Mg_al_pftb_AlObreak
-    (("Mg_al_pftb_AlObreak", "struct1"), ("Mg_al_pftb_AlObreak", "struct2")),
-    (("Mg_al_pftb_AlObreak", "struct2"), ("Mg_al_pftb_AlObreak", "struct3")),
-    # Mg_al_pftb_CObreak
-    (("Mg_al_pftb_AlObreak", "struct1"), ("Mg_al_pftb_CObreak", "struct2")),
-    (("Mg_al_pftb_CObreak", "struct2"), ("Mg_al_pftb_CObreak", "struct3")),
-    # Mg_al_tfip_AlObreak
-    (("Mg_al_tfip_AlObreak", "struct1"), ("Mg_al_tfip_AlObreak", "struct2")),
-    (("Mg_al_tfip_AlObreak", "struct2"), ("Mg_al_tfip_AlObreak", "struct3")),
-    (("Mg_al_tfip_AlObreak", "struct3"), ("Mg_al_tfip_AlObreak", "struct4")),
-    # Mg_al_tfip_CObreak
-    (("Mg_al_tfip_AlObreak", "struct1"), ("Mg_al_tfip_CObreak", "struct2")),
-    (("Mg_al_tfip_CObreak", "struct2"), ("Mg_al_tfip_CObreak", "struct3")),
-    # Mg_al_tftb_AlObreak
-    (("Mg_al_tftb_AlObreak", "struct1"), ("Mg_al_tftb_AlObreak", "struct2")),
-    (("Mg_al_tftb_AlObreak", "struct2"), ("Mg_al_tftb_AlObreak", "struct3")),
+# These are basically all huge and costly - for now, not including
+# REACTIONS_BORATE_ALUMINATE = [
+#     # Ca_al_hfip_AlObreak
+#     (("Ca_al_hfip_AlObreak", "struct1"), ("Ca_al_hfip_AlObreak", "struct2")),
+#     (("Ca_al_hfip_AlObreak", "struct2"), ("Ca_al_hfip_AlObreak", "struct3")),
+#     (("Ca_al_hfip_AlObreak", "struct3"), ("Ca_al_hfip_AlObreak", "struct4")),
+#     # Ca_al_hfip_CObreak
+#     (("Ca_al_hfip_CObreak", "struct1"), ("Ca_al_hfip_CObreak", "struct2")),
+#     (("Ca_al_hfip_CObreak", "struct2"), ("Ca_al_hfip_CObreak", "struct3")),
+#     # Ca_al_hftb_AlObreak
+#     (("Ca_al_hftb_AlObreak", "struct1"), ("Ca_al_hftb_AlObreak", "struct2")),
+#     (("Ca_al_hftb_AlObreak", "struct2"), ("Ca_al_hftb_AlObreak", "struct3")),
+#     (("Ca_al_hftb_AlObreak", "struct3"), ("Ca_al_hftb_AlObreak", "struct4")),
+#     # Ca_al_hftb_CFbreak
+#     (("Ca_al_hftb_AlObreak", "struct1"), ("Ca_al_hftb_CFbreak", "struct2")),
+#     # Ca_al_hftb_CObreak
+#     (("Ca_al_hftb_CObreak", "struct1"), ("Ca_al_hftb_CObreak", "struct2")),
+#     # Ca_al_pftb_AlObreak
+#     (("Ca_al_pftb_AlObreak", "struct1"), ("Ca_al_pftb_AlObreak", "struct2")),
+#     (("Ca_al_pftb_AlObreak", "struct2"), ("Ca_al_pftb_AlObreak", "struct3")),
+#     (("Ca_al_pftb_AlObreak", "struct3"), ("Ca_al_pftb_AlObreak", "struct4")),
+#     # Ca_al_pftb_CFbreak
+#     (("Ca_al_pftb_CFbreak", "struct1"), ("Ca_al_pftb_CFbreak", "struct2")),
+#     # Ca_al_pftb_CObreak
+#     (("Ca_al_pftb_CObreak", "struct1"), ("Ca_al_pftb_CObreak", "struct2")),
+#     # Ca_al_tfip_AlObreak
+#     (("Ca_al_tfip_AlObreak", "struct1"), ("Ca_al_tfip_AlObreak", "struct2")),
+#     (("Ca_al_tfip_AlObreak", "struct2"), ("Ca_al_tfip_AlObreak", "struct3")),
+#     (("Ca_al_tfip_AlObreak", "struct3"), ("Ca_al_tfip_AlObreak", "struct4")),
+#     # Ca_al_tfip_CObreak
+#     (("Ca_al_tfip_CObreak", "struct1"), ("Ca_al_tfip_CObreak", "struct2")),
+#     (("Ca_al_tfip_CObreak", "struct2"), ("Ca_al_tfip_CObreak", "struct3")),
+#     # Ca_al_tftb_AlObreak
+#     (("Ca_al_tftb_AlObreak", "struct1"), ("Ca_al_tftb_AlObreak", "struct2")),
+#     (("Ca_al_tftb_AlObreak", "struct2"), ("Ca_al_tftb_AlObreak", "struct3")),
+#     (("Ca_al_tftb_AlObreak", "struct3"), ("Ca_al_tftb_AlObreak", "struct4")),
+#     # Ca_al_tftb_CObreak
+#     (("Ca_al_tftb_CObreak", "struct1"), ("Ca_al_tftb_CObreak", "struct2")),
+#     (("Ca_al_tftb_CObreak", "struct2"), ("Ca_al_tftb_CObreak", "struct3")),
+#     # Ca_b_hfip_BObreak
+#     (("Ca_b_hfip_BObreak", "struct1"), ("Ca_b_hfip_BObreak", "struct2")),
+#     # Ca_b_hfip_CObreak
+#     (("Ca_b_hfip_CObreak", "struct1"), ("Ca_b_hfip_CObreak", "struct2")),
+#     (("Ca_b_hfip_CObreak", "struct2"), ("Ca_b_hfip_CObreak", "struct3")),
+#     # Ca_b_hftb_BObreak
+#     (("Ca_b_hftb_BObreak", "struct1"), ("Ca_b_hftb_BObreak", "struct2")),
+#     # Ca_b_hftb_CFbreak
+#     (("Ca_b_hftb_CFbreak", "struct1"), ("Ca_b_hftb_CFbreak", "struct2")),
+#     # Ca_b_hftb_CObreak
+#     (("Ca_b_hftb_CObreak", "struct1"), ("Ca_b_hftb_CObreak", "struct2")),
+#     # Ca_b_pftb_BObreak
+#     (("Ca_b_pftb_BObreak", "struct1"), ("Ca_b_pftb_BObreak", "struct2")),
+#     (("Ca_b_pftb_BObreak", "struct2"), ("Ca_b_pftb_BObreak", "struct3")),
+#     # Ca_b_pftb_CFbreak
+#     (("Ca_b_pftb_CFbreak", "struct1"), ("Ca_b_pftb_CFbreak", "struct2")),
+#     # Ca_b_pftb_CObreak
+#     (("Ca_b_pftb_CObreak", "struct1"), ("Ca_b_pftb_CObreak", "struct2")),
+#     # Ca_b_tfip_BObreak
+#     (("Ca_b_tfip_BObreak", "struct1"), ("Ca_b_tfip_BObreak", "struct2")),
+#     (("Ca_b_tfip_BObreak", "struct2"), ("Ca_b_tfip_BObreak", "struct3")),
+#     # Ca_b_tfip_CObreak
+#     (("Ca_b_tfip_CObreak", "struct1"), ("Ca_b_tfip_CObreak", "struct2")),
+#     (("Ca_b_tfip_CObreak", "struct2"), ("Ca_b_tfip_CObreak", "struct3")),
+#     # Ca_b_tftb_BObreak
+#     (("Ca_b_tftb_BObreak", "struct1"), ("Ca_b_tftb_BObreak", "struct2")),
+#     (("Ca_b_tftb_BObreak", "struct2"), ("Ca_b_tftb_BObreak", "struct3")),
+#     (("Ca_b_tftb_BObreak", "struct3"), ("Ca_b_tftb_BObreak", "struct4")),
+#     # Ca_b_tftb_CObreak
+#     (("Ca_b_tftb_CObreak", "struct1"), ("Ca_b_tftb_CObreak", "struct2")),
+#     (("Ca_b_tftb_CObreak", "struct2"), ("Ca_b_tftb_CObreak", "struct3")),
+#     (("Ca_b_tftb_CObreak", "struct3"), ("Ca_b_tftb_CObreak", "struct4")),
+#     # Mg_al_hfip_AlObreak
+#     (("Mg_al_hfip_AlObreak", "struct1"), ("Mg_al_hfip_AlObreak", "struct2")),
+#     (("Mg_al_hfip_AlObreak", "struct2"), ("Mg_al_hfip_AlObreak", "struct3")),
+#     (("Mg_al_hfip_AlObreak", "struct3"), ("Mg_al_hfip_AlObreak", "struct4")),
+#     # Mg_al_hfip_CObreak
+#     (("Mg_al_hfip_CObreak", "struct1"), ("Mg_al_hfip_CObreak", "struct2")),
+#     (("Mg_al_hfip_CObreak", "struct2"), ("Mg_al_hfip_CObreak", "struct3")),
+#     # Mg_al_hftb_AlObreak
+#     (("Mg_al_hftb_AlObreak", "struct1"), ("Mg_al_hftb_AlObreak", "struct2")),
+#     (("Mg_al_hftb_AlObreak", "struct2"), ("Mg_al_hftb_AlObreak", "struct3")),
+#     # Mg_al_hftb_CObreak
+#     (("Mg_al_hftb_CObreak", "struct1"), ("Mg_al_hftb_CObreak", "struct2")),
+#     (("Mg_al_hftb_CObreak", "struct2"), ("Mg_al_hftb_CObreak", "struct3")),
+#     # Mg_al_pftb_AlObreak
+#     (("Mg_al_pftb_AlObreak", "struct1"), ("Mg_al_pftb_AlObreak", "struct2")),
+#     (("Mg_al_pftb_AlObreak", "struct2"), ("Mg_al_pftb_AlObreak", "struct3")),
+#     # Mg_al_pftb_CObreak
+#     (("Mg_al_pftb_AlObreak", "struct1"), ("Mg_al_pftb_CObreak", "struct2")),
+#     (("Mg_al_pftb_CObreak", "struct2"), ("Mg_al_pftb_CObreak", "struct3")),
+#     # Mg_al_tfip_AlObreak
+#     (("Mg_al_tfip_AlObreak", "struct1"), ("Mg_al_tfip_AlObreak", "struct2")),
+#     (("Mg_al_tfip_AlObreak", "struct2"), ("Mg_al_tfip_AlObreak", "struct3")),
+#     (("Mg_al_tfip_AlObreak", "struct3"), ("Mg_al_tfip_AlObreak", "struct4")),
+#     # Mg_al_tfip_CObreak
+#     (("Mg_al_tfip_AlObreak", "struct1"), ("Mg_al_tfip_CObreak", "struct2")),
+#     (("Mg_al_tfip_CObreak", "struct2"), ("Mg_al_tfip_CObreak", "struct3")),
+#     # Mg_al_tftb_AlObreak
+#     (("Mg_al_tftb_AlObreak", "struct1"), ("Mg_al_tftb_AlObreak", "struct2")),
+#     (("Mg_al_tftb_AlObreak", "struct2"), ("Mg_al_tftb_AlObreak", "struct3")),
     
-    # Mg B HFIP - seems struct1 is missing from Mg_b_hfip_BObreak and Mg_b_hfip_CObreak
-    # Could use Mg_b_hfip_0.xyz from ox_red_potential_CIP_wb97xd:
-    # For now, ignoring
+#     # Mg B HFIP - seems struct1 is missing from Mg_b_hfip_BObreak and Mg_b_hfip_CObreak
+#     # Could use Mg_b_hfip_0.xyz from ox_red_potential_CIP_wb97xd:
+#     # For now, ignoring
 
-    # Mg_b_hftb_BObreak
-    (("Mg_b_hftb_BObreak", "struct1"), ("Mg_b_hftb_BObreak", "struct2")),
-    (("Mg_b_hftb_BObreak", "struct2"), ("Mg_b_hftb_BObreak", "struct3")),
-    # Mg_b_hftb_CFbreak
-    (("Mg_b_hftb_CFbreak", "struct1"), ("Mg_b_hftb_CFbreak", "struct2")),
-    # Mg_b_hftb_CObreak
-    (("Mg_b_hftb_CObreak", "struct1"), ("Mg_b_hftb_CObreak", "struct2")),
-    # Mg_b_pftb_BObreak
-    (("Mg_b_pftb_BObreak", "struct1"), ("Mg_b_pftb_BObreak", "struct2")),
-    (("Mg_b_pftb_BObreak", "struct2"), ("Mg_b_pftb_BObreak", "struct3")),
-    # Mg_b_pftb_CFbreak
-    (("Mg_b_pftb_CFbreak", "struct1"), ("Mg_b_pftb_CFbreak", "struct2")),
-    # Mg_b_pftb_CObreak
-    (("Mg_b_pftb_CObreak", "struct1"), ("Mg_b_pftb_CObreak", "struct2")),
-    (("Mg_b_pftb_CObreak", "struct2"), ("Mg_b_pftb_CObreak", "struct3")),
-    (("Mg_b_pftb_CObreak", "struct3"), ("Mg_b_pftb_CObreak", "struct4")),
-    # Mg_b_tfip_BObreak
-    (("Mg_b_tfip_BObreak", "struct1"), ("Mg_b_tfip_BObreak", "struct2")),
-    (("Mg_b_tfip_BObreak", "struct2"), ("Mg_b_tfip_BObreak", "struct3")),   
-    # Mg_b_tfip_CObreak
-    (("Mg_b_tfip_BObreak", "struct1"), ("Mg_b_tfip_CObreak", "struct2")),
-    (("Mg_b_tfip_CObreak", "struct2"), ("Mg_b_tfip_CObreak", "struct3")),
-    # Mg_b_tftb_BObreak
-    (("Mg_b_tftb_BObreak", "struct1"), ("Mg_b_tftb_BObreak", "struct2")),
-    (("Mg_b_tftb_BObreak", "struct2"), ("Mg_b_tftb_BObreak", "struct3")),
-    (("Mg_b_tftb_BObreak", "struct3"), ("Mg_b_tftb_BObreak", "struct4")),
-    # Mg_b_tftb_CObreak
-    (("Mg_b_tftb_CObreak", "struct1"), ("Mg_b_tftb_CObreak", "struct2")),
-    (("Mg_b_tftb_CObreak", "struct2"), ("Mg_b_tftb_CObreak", "struct3")),
-    (("Mg_b_tftb_CObreak", "struct3"), ("Mg_b_tftb_CObreak", "struct4")),
-]
+#     # Mg_b_hftb_BObreak
+#     (("Mg_b_hftb_BObreak", "struct1"), ("Mg_b_hftb_BObreak", "struct2")),
+#     (("Mg_b_hftb_BObreak", "struct2"), ("Mg_b_hftb_BObreak", "struct3")),
+#     # Mg_b_hftb_CFbreak
+#     (("Mg_b_hftb_CFbreak", "struct1"), ("Mg_b_hftb_CFbreak", "struct2")),
+#     # Mg_b_hftb_CObreak
+#     (("Mg_b_hftb_CObreak", "struct1"), ("Mg_b_hftb_CObreak", "struct2")),
+#     # Mg_b_pftb_BObreak
+#     (("Mg_b_pftb_BObreak", "struct1"), ("Mg_b_pftb_BObreak", "struct2")),
+#     (("Mg_b_pftb_BObreak", "struct2"), ("Mg_b_pftb_BObreak", "struct3")),
+#     # Mg_b_pftb_CFbreak
+#     (("Mg_b_pftb_CFbreak", "struct1"), ("Mg_b_pftb_CFbreak", "struct2")),
+#     # Mg_b_pftb_CObreak
+#     (("Mg_b_pftb_CObreak", "struct1"), ("Mg_b_pftb_CObreak", "struct2")),
+#     (("Mg_b_pftb_CObreak", "struct2"), ("Mg_b_pftb_CObreak", "struct3")),
+#     (("Mg_b_pftb_CObreak", "struct3"), ("Mg_b_pftb_CObreak", "struct4")),
+#     # Mg_b_tfip_BObreak
+#     (("Mg_b_tfip_BObreak", "struct1"), ("Mg_b_tfip_BObreak", "struct2")),
+#     (("Mg_b_tfip_BObreak", "struct2"), ("Mg_b_tfip_BObreak", "struct3")),   
+#     # Mg_b_tfip_CObreak
+#     (("Mg_b_tfip_BObreak", "struct1"), ("Mg_b_tfip_CObreak", "struct2")),
+#     (("Mg_b_tfip_CObreak", "struct2"), ("Mg_b_tfip_CObreak", "struct3")),
+#     # Mg_b_tftb_BObreak
+#     (("Mg_b_tftb_BObreak", "struct1"), ("Mg_b_tftb_BObreak", "struct2")),
+#     (("Mg_b_tftb_BObreak", "struct2"), ("Mg_b_tftb_BObreak", "struct3")),
+#     (("Mg_b_tftb_BObreak", "struct3"), ("Mg_b_tftb_BObreak", "struct4")),
+#     # Mg_b_tftb_CObreak
+#     (("Mg_b_tftb_CObreak", "struct1"), ("Mg_b_tftb_CObreak", "struct2")),
+#     (("Mg_b_tftb_CObreak", "struct2"), ("Mg_b_tftb_CObreak", "struct3")),
+#     (("Mg_b_tftb_CObreak", "struct3"), ("Mg_b_tftb_CObreak", "struct4")),
+# ]
 
 
 # From 10.1021/jacs.1c05807
 REACTIONS_LEDC_LEMC = [
     # Figure 4a
     (("figure4a", "struct1"), ("figure4a", "struct2")),
-    (("figure4a", "struct2"), ("figure4a", "struct3")),
+    # (("figure4a", "struct2"), ("figure4a", "struct3")),  # Not actually balanced
     (("figure4a", "struct3"), ("figure4a", "struct4")),
     (("figure4a", "struct4"), ("figure4a", "struct5")),
     (("figure4a", "struct3"), ("figure4a", "struct6")),
@@ -422,7 +423,14 @@ def process_ox(
         rct_mgs = [mgs[x] for x in reaction["reactants"]]
         pro_mgs = [mgs[x] for x in reaction["products"]]
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(OX){rxn_id}"))
+        # Confirm that reactants and products have same elements
+        if rct_mgs[0].molecule.species == pro_mgs[0].molecule.species:
+            # Reactants and products should always have the same atom mapping
+            mapping = {(0, i): (0, i) for i in range(len(rct_mgs[0].molecule))}
+
+            reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, mapping=mapping, label=f"ELYTE-TS:(OX){rxn_id}"))
+        else:
+            reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(OX){rxn_id}"))
 
     return reaction_data
 
@@ -612,43 +620,62 @@ def process_mesoscale(
     return reaction_data
 
 
-def process_borate_aluminate(
-    base_dir: str | Path
-) -> List[Dict[str, Any]]:
+# def process_borate_aluminate(
+#     base_dir: str | Path
+# ) -> List[Dict[str, Any]]:
 
-    reaction_data = list()
+#     reaction_data = list()
 
-    logging.info(f"\tBEGINNING PROCESSING BORATE/ALUMINATE DATASET FROM: {base_dir}")
+#     logging.info(f"\tBEGINNING PROCESSING BORATE/ALUMINATE DATASET FROM: {base_dir}")
 
-    if isinstance(base_dir, str):
-        base_dir = Path(base_dir)
+#     if isinstance(base_dir, str):
+#         base_dir = Path(base_dir)
 
-    # This is inefficient, but only slightly
-    # Most structures are not used more than once
+#     # This is inefficient, but only slightly
+#     # Most structures are not used more than once
 
-    for reaction in REACTIONS_BORATE_ALUMINATE:
-        reactant = reaction[0]
-        product = reaction[1]
+#     for reaction in REACTIONS_BORATE_ALUMINATE:
+#         reactant = reaction[0]
+#         product = reaction[1]
 
-        rxn_id = f"{reactant[0]}_{reactant[1]}->{product[0]}_{product[1]}"
-        logging.info(f"\t\tProcessing reaction: {rxn_id}")
+#         rxn_id = f"{reactant[0]}_{reactant[1]}->{product[0]}_{product[1]}"
+#         logging.info(f"\t\tProcessing reaction: {rxn_id}")
 
-        # All complexes are neutral, so there's no need to modify charge/spin
-        rct_mol = Molecule.from_file(base_dir / reactant[0] / f"{reactant[1]}.xyz")
-        pro_mol = Molecule.from_file(base_dir / product[0] / f"{product[1]}.xyz")
+#         # All complexes are neutral, so there's no need to modify charge/spin
+#         rct_mol = Molecule.from_file(base_dir / reactant[0] / f"{reactant[1]}.xyz")
+#         pro_mol = Molecule.from_file(base_dir / product[0] / f"{product[1]}.xyz")
 
-        # This is another case where there are disconnected fragments in some reactants/products
-        # As assigning charges to sub-molecule graphs is nontrivial, for now we leave complexes whole
-        # This will make this subset of the data somewhat easier - no complexes need to be made
+#         # This is another case where there are disconnected fragments in some reactants/products
+#         # As assigning charges to sub-molecule graphs is nontrivial, for now we leave complexes whole
+#         # This will make this subset of the data somewhat easier - no complexes need to be made
 
-        rct_mg = MoleculeGraph.with_local_env_strategy(rct_mol, OpenBabelNN())
-        rct_mg = metal_edge_extender(rct_mg, **METAL_EDGE_EXTENDER_PARAMS)
-        pro_mg = MoleculeGraph.with_local_env_strategy(pro_mol, OpenBabelNN())
-        pro_mg = metal_edge_extender(pro_mg, **METAL_EDGE_EXTENDER_PARAMS)
+#         rct_mg = MoleculeGraph.with_local_env_strategy(rct_mol, OpenBabelNN())
+#         rct_mg = metal_edge_extender(rct_mg, **METAL_EDGE_EXTENDER_PARAMS)
+#         pro_mg = MoleculeGraph.with_local_env_strategy(pro_mol, OpenBabelNN())
+#         pro_mg = metal_edge_extender(pro_mg, **METAL_EDGE_EXTENDER_PARAMS)
 
-        reaction_data.append(prepare_reaction_for_input([rct_mg], [pro_mg], label=f"ELYTE-TS:(BORATE/ALUMINATE){rxn_id}"))
+#         # No mapping should be needed
+#         if rct_mol.species == pro_mol.species:
+#             mapping = {(0, i): (0, i) for i in range(len(rct_mol))}
 
-    return reaction_data
+#             reaction_data.append(
+#                 prepare_reaction_for_input(
+#                     [rct_mg],
+#                     [pro_mg],
+#                     mapping=mapping,
+#                     label=f"ELYTE-TS:(BORATE/ALUMINATE){rxn_id}"
+#                 )
+#             )
+#         else:
+#             reaction_data.append(
+#                 prepare_reaction_for_input(
+#                     [rct_mg],
+#                     [pro_mg],
+#                     label=f"ELYTE-TS:(BORATE/ALUMINATE){rxn_id}"
+#                 )
+#             )
+
+#     return reaction_data
 
 
 def process_ledc_lemc(
@@ -674,7 +701,7 @@ def process_ledc_lemc(
         rct_mol = Molecule.from_file(base_dir / reactant[0] / f"{reactant[1]}.xyz")
         rct_mol.set_charge_and_spin(charge)
         pro_mol = Molecule.from_file(base_dir / product[0] / f"{product[1]}.xyz")
-        pro_mol = pro_mol.set_charge_and_spin(charge)
+        pro_mol.set_charge_and_spin(charge)
 
         # This is another case where there are disconnected fragments in some reactants/products
         # As assigning charges to sub-molecule graphs is nontrivial, for now we leave complexes whole
@@ -685,7 +712,26 @@ def process_ledc_lemc(
         pro_mg = MoleculeGraph.with_local_env_strategy(pro_mol, OpenBabelNN())
         pro_mg = metal_edge_extender(pro_mg, **METAL_EDGE_EXTENDER_PARAMS)
 
-        reaction_data.append(prepare_reaction_for_input([rct_mg], [pro_mg], label=f"ELYTE-TS:(LEDC/LEMC){rxn_id}"))
+        # No mapping should be needed
+        if rct_mol.species == pro_mol.species:
+            mapping = {(0, i): (0, i) for i in range(len(rct_mol))}
+
+            reaction_data.append(
+                prepare_reaction_for_input(
+                    [rct_mg],
+                    [pro_mg],
+                    mapping=mapping,
+                    label=f"ELYTE-TS:(LEDC/LEMC){rxn_id}"
+                )
+            )
+        else:
+            reaction_data.append(
+                prepare_reaction_for_input(
+                    [rct_mg],
+                    [pro_mg],
+                    label=f"ELYTE-TS:(LEDC/LEMC){rxn_id}"
+                )
+            )
 
     return reaction_data
 
@@ -697,7 +743,7 @@ def process_elyte_ts(
     hiprgen_path: str | Path,
     kmc_path: str | Path,
     mesoscale_path: str | Path,
-    borate_aluminate_path: str | Path,
+    # borate_aluminate_path: str | Path,
     ledc_lemc_path: str | Path,
 ):
     
@@ -708,7 +754,7 @@ def process_elyte_ts(
     reaction_data += process_hiprgen(hiprgen_path)
     reaction_data += process_kmc(kmc_path)
     reaction_data += process_mesoscale(mesoscale_path)
-    reaction_data += process_borate_aluminate(borate_aluminate_path)
+    # reaction_data += process_borate_aluminate(borate_aluminate_path)
     reaction_data += process_ledc_lemc(ledc_lemc_path)
 
     return reaction_data

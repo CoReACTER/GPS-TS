@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -25,6 +25,8 @@ METAL_EDGE_EXTENDER_PARAMS = {
     "metals": METALS,
     "coordinators": ("O", "N", "S", "C", "P", "Se", "Si", "Ge", "As", "Cl", "B", "I", "Br", "Te", "F", "Sb"),
 }
+
+MAX_BENCHMARK_REACTION_NUMATOMS = 30
 
 
 def atoms_to_molecule_graph(
@@ -113,6 +115,7 @@ def construct_molecule_from_adjacency_matrix(
 def prepare_reaction_for_input(
     rct_mgs: List[MoleculeGraph],
     pro_mgs: List[MoleculeGraph],
+    mapping: Optional[Dict[Tuple[int, int], Tuple[int, int]]] = None,
     label: Optional[str] = None
 ) -> Dict[str, Any]:
 
@@ -123,32 +126,34 @@ def prepare_reaction_for_input(
     pro_charges = {i: e.molecule.charge for i, e in enumerate(pro_mgs)}
     pro_spins = {i: e.molecule.spin_multiplicity for i, e in enumerate(pro_mgs)}
     
-    rct_map_number, prdt_map_number, _ = get_reaction_atom_mapping(
-            rct_mgs, pro_mgs
-    )
+    # If we don't have a mapping a priori, need to perform atom mapping
+    if mapping is None:
+        rct_map_number, prdt_map_number, _ = get_reaction_atom_mapping(
+                rct_mgs, pro_mgs
+        )
 
-    # Reformat mapping
-    #TODO: This is pretty inefficient (though much less costly than the MLIP)
-    # Should probably just rewrite the atom mapping code to have a better output format
-    mapping = dict()
-    for ir, rct in enumerate(rct_map_number):
-        for aatomind, aindex in rct.items():
-            match = False
+        # Reformat mapping
+        #TODO: This is pretty inefficient (though much less costly than the MLIP)
+        # Should probably just rewrite the atom mapping code to have a better output format
+        mapping = dict()
+        for ir, rct in enumerate(rct_map_number):
+            for aatomind, aindex in rct.items():
+                match = False
 
-            for ip, pro in enumerate(prdt_map_number):
-                if match:
-                    break
-
-                for batomind, bindex in pro.items():
-                    if aindex == bindex:
-                        mapping[(ir, aatomind)] = (ip, batomind)
-                        match = True
+                for ip, pro in enumerate(prdt_map_number):
+                    if match:
                         break
 
-            # No match found in any of the products
-            # Should never happen, if atom mapping code isn't broken...
-            if not match:
-                raise ValueError(f"Mapping failed! Atom {aatomind} of reactant {ir} could not be matched!")
+                    for batomind, bindex in pro.items():
+                        if aindex == bindex:
+                            mapping[(ir, aatomind)] = (ip, batomind)
+                            match = True
+                            break
+
+                # No match found in any of the products
+                # Should never happen, if atom mapping code isn't broken...
+                if not match:
+                    raise ValueError(f"Mapping failed! Atom {aatomind} of reactant {ir} could not be matched!")
     
     inverse_mapping = dict()
     for a, b in mapping.items():

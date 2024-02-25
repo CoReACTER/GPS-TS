@@ -5,9 +5,13 @@ from typing import Any, Dict, List
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import oxygen_edge_extender, OpenBabelNN
+from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
 
-from gpsts.utils import prepare_reaction_for_input
+from gpsts.utils import (
+    MAX_BENCHMARK_REACTION_NUMATOMS,
+    METAL_EDGE_EXTENDER_PARAMS,
+    prepare_reaction_for_input,
+)
 
 
 MOBH_35_REACTIONS = {
@@ -83,9 +87,16 @@ def process_mobh35(
 
     # After this, should be very straightforward to generate reaction data
     for rxn_id, end_names in MOBH_35_REACTIONS.items():
+
         logging.info(f"\tProcessing reaction: {rxn_id}")
         rct_mgs = [mgs[x] for x in end_names["reactant"]]
         pro_mgs = [mgs[x] for x in end_names["product"]]
+
+        total_length = sum([len(x.molecule) for x in rct_mgs])
+
+        if total_length > MAX_BENCHMARK_REACTION_NUMATOMS:
+            logging.info(f"\t\tSKIPPING: reaction too large")
+            continue 
 
         reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"MOBH35:{rxn_id}"))
 

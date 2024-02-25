@@ -8,6 +8,7 @@ from pymatgen.analysis.graphs import MoleculeGraph
 from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
 
 from gpsts.utils import (
+    MAX_BENCHMARK_REACTION_NUMATOMS,
     METAL_EDGE_EXTENDER_PARAMS,
     prepare_reaction_for_input
 )
@@ -62,6 +63,12 @@ def process_bh9(
         for pro_file in pro_files:
             pro_path = xyz_dir / pro_file
             pro_mgs.append(mg_from_bh9(pro_path))
+
+        total_length = sum([len(x.molecule) for x in rct_mgs])
+
+        if total_length > MAX_BENCHMARK_REACTION_NUMATOMS:
+            logging.info(f"\t\tSKIPPING: reaction too large")
+            continue
 
         reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"BH9:{rxn_id}"))
 

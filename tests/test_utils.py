@@ -43,6 +43,7 @@ def test_construct_molecule_from_adjacency_matrix(test_dir):
         assert (bond in mg_bonds or (bond[1], bond[0]) in mg_bonds)
 
 
+# TODO: add test with mapping pre-assigned
 def test_prepare_reaction_for_input(molecules_1r1p, molecules_2r1p, molecules_2r2p):
     # Simple case: one reactant, one product
     # Test molecule graphs, and mapping

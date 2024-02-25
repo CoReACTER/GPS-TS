@@ -5,9 +5,13 @@ from typing import Any, Dict, List
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import oxygen_edge_extender, OpenBabelNN
+from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
 
-from gpsts.utils import prepare_reaction_for_input
+from gpsts.utils import (
+    MAX_BENCHMARK_REACTION_NUMATOMS,
+    METAL_EDGE_EXTENDER_PARAMS,
+    prepare_reaction_for_input
+)
 
 
 ROST_61_REACTIONS = {
@@ -252,7 +256,7 @@ def process_rost61(
     for subdir in [
         p.resolve() for p in xyz_dir.iterdir() if p.is_dir() 
     ]:
-        name = p.name
+        name = subdir.name
         molid = int(name.replace("m", ""))
         mol = Molecule.from_file(subdir / "mol.xyz")
         charge, spin = ROST61_CHARGE_SPIN[molid]
@@ -271,6 +275,12 @@ def process_rost61(
         end_names = ROST_61_REACTIONS[rxn_id]
         rct_mgs = [mgs[x] for x in end_names["reactant"]]
         pro_mgs = [mgs[x] for x in end_names["product"]]
+
+        total_length = sum([len(x.molecule) for x in rct_mgs])
+
+        if total_length > MAX_BENCHMARK_REACTION_NUMATOMS:
+            logging.info(f"\t\tSKIPPING: reaction too large")
+            continue
 
         reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ROST61:{rxn_id}"))
 

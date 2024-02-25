@@ -1,7 +1,7 @@
 import logging
 from glob import glob
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
@@ -67,6 +67,47 @@ def process_bh2o(
         # In some cases, there are multiple reactants or products - need to check for disconnected subgraphs
         rct_mgs = rct_mg.get_disconnected_fragments()
         pro_mgs = pro_mg.get_disconnected_fragments()
+
+        # Certain molecules (within this dataset) are always neutral, and others are always ionic
+        neutral_formulas = ["H2 O1", "N2", "C1 H5 N1"]
+        negative_formulas = ["O1 H1"]
+
+        # Make sure charge is distributed properly
+        if len(rct_mgs) == 2 and charge != 0:
+            for ii, mg in enumerate(rct_mgs):
+                if mg.molecule.composition.alphabetical_formula in neutral_formulas:
+                    mg.molecule.set_charge_and_spin(0)
+                    if ii == 0:
+                        rct_mgs[1].molecule.set_charge_and_spin(charge)
+                    else:
+                        rct_mgs[0].molecule.set_charge_and_spin(charge)
+
+                    break
+                elif mg.molecule.composition.alphabetical_formula in negative_formulas:
+                    mg.molecule.set_charge_and_spin(-1)
+                    if ii == 0:
+                         rct_mgs[1].molecule.set_charge_and_spin(0)
+                    else:
+                        rct_mgs[0].molecule.set_charge_and_spin(0)
+                    break
+
+        if len(pro_mgs) == 2 and charge != 0:
+            for ii, mg in enumerate(pro_mgs):
+                if mg.molecule.composition.alphabetical_formula in neutral_formulas:
+                    mg.molecule.set_charge_and_spin(0)
+                    if ii == 0:
+                        pro_mgs[1].molecule.set_charge_and_spin(charge)
+                    else:
+                        pro_mgs[0].molecule.set_charge_and_spin(charge)
+
+                    break
+                elif mg.molecule.composition.alphabetical_formula in negative_formulas:
+                    mg.molecule.set_charge_and_spin(-1)
+                    if ii == 0:
+                        pro_mgs[1].molecule.set_charge_and_spin(0)
+                    else:
+                        pro_mgs[0].molecule.set_charge_and_spin(0)
+                    break
 
         reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"BH2O-36: {reaction}"))
     
