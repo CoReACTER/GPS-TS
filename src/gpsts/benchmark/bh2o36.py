@@ -5,10 +5,11 @@ from typing import Any, Dict, List, Tuple
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import oxygen_edge_extender, OpenBabelNN
+from pymatgen.analysis.local_env import OpenBabelNN
 
 from gpsts.utils import (
     construct_molecule_from_adjacency_matrix,
+    oxygen_edge_extender,
     prepare_reaction_for_input,
     read_adjacency_matrix,
 )
@@ -23,8 +24,8 @@ __date__ = "February 2024"
 
 reactions = [
     "aceticanhydride",
-    "amide_2_1",
-    "amide_2_2",
+    # "amide_2_1",
+    # "amide_2_2",
     "basic_epoxide_1",
     "basic_epoxide_2",
     "borohydride",
@@ -34,9 +35,9 @@ reactions = [
     "epoxide1",
     "epoxide2",
     "ester",
-    "furan1",
-    "furan2",
-    "furan3",
+    # "furan1",
+    # "furan2",
+    # "furan3",
     "imine",
     "iminium",
     "lactone"

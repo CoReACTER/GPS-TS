@@ -5,10 +5,11 @@ from typing import Any, Dict, List
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import oxygen_edge_extender, OpenBabelNN
+from pymatgen.analysis.local_env import OpenBabelNN
 
 from gpsts.utils import (
     construct_molecule_from_adjacency_matrix,
+    oxygen_edge_extender,
     prepare_reaction_for_input,
     read_adjacency_matrix,
 )

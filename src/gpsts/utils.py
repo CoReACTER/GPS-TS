@@ -15,13 +15,13 @@ from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
+from pymatgen.analysis.local_env import metal_edge_extender, OpenBabelNN
 from pymatgen.util.graph_hashing import weisfeiler_lehman_graph_hash
 
 from gpsts.atom_mapping import get_reaction_atom_mapping
 
 
-__author__ = "Evan Spotte-Smith"
+__author__ = "Evan Spotte-Smith, Samuel M. Blau"
 __maintainer__ = "Evan Spotte-Smith"
 __email__ = "espottesmith@gmail.com"
 __status__ = "Alpha"
@@ -309,3 +309,38 @@ def load_benchmark_data(data_path: str | Path) -> List[Dict[str, Any]]:
         processed_data.append(processed_datum)
     
     return processed_data
+
+
+def oxygen_edge_extender(
+    mol_graph: MoleculeGraph,
+    hydrogen_cutoff: int = 1.2,
+    carbon_cutoff: int = 1.7
+) -> MoleculeGraph:
+    """
+    Identify and add missed O-C or O-H bonds. This is particularly
+    important when oxygen is forming three bonds, e.g. in H3O+ or XOH2+.
+    See https://github.com/materialsproject/pymatgen/pull/2903 for details.
+
+    TODO:
+        - This should be in pymatgen
+        - This should be generalized and should have flexible parameters, like metal_edge_extender
+
+    Args:
+        mol_graph (MoleculeGraph): molecule graph to extend
+        hydrogen_cutoff (int):
+        carbon_cutoff (int):
+
+    Returns:
+        MoleculeGraph: object with additional O-C or O-H bonds added (if any found)
+    """
+    num_new_edges = 0
+    for idx in mol_graph.graph.nodes():
+        if mol_graph.graph.nodes()[idx]["specie"] == "O":
+            neighbors = [site[2] for site in mol_graph.get_connected_sites(idx)]
+            for ii, site in enumerate(mol_graph.molecule):
+                is_O_C_bond = str(site.specie) == "C" and site.distance(mol_graph.molecule[idx]) < carbon_cutoff
+                is_O_H_bond = str(site.specie) == "H" and site.distance(mol_graph.molecule[idx]) < hydrogen_cutoff
+                if ii != idx and ii not in neighbors and (is_O_C_bond or is_O_H_bond):
+                    mol_graph.add_edge(idx, ii)
+                    num_new_edges += 1
+    return mol_graph

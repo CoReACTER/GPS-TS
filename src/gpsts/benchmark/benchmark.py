@@ -10,7 +10,7 @@ import jobflow as jf
 
 from gpsts.complexes import make_complexes
 from gpsts.geodesic import construct_geodesic_path
-from gpsts.quacc import path_static_flow
+from gpsts.quacc import path_static_flow_orca, path_static_flow_qchem
 from gpsts.utils import load_benchmark_data
 
 
@@ -32,29 +32,30 @@ def generate_benchmark_complexes(
     entrance_exit_complexes = dict()
 
     for reaction in raw_data:
-        try:
-            entrance_complex, exit_complex = make_complexes(
-                reaction["reactants"],
-                reaction["products"],
-                reaction["mapping"],
-                reaction["reacting_atoms_reactants"],
-                reaction["reacting_atoms_products"],
-                reaction["bonds_breaking"],
-                reaction["bonds_forming"],
-                reaction["rct_charges"],
-                reaction["rct_spins"],
-                reaction["pro_charges"],
-                reaction["pro_spins"]
-            )
-            entrance_exit_complexes[reaction["label"]] = {
-                "entrance_complex": entrance_complex,
-                "exit_complex": exit_complex,
-                "charge": sum(reaction["rct_charges"]),
-                "spin": sum([x - 1 for x in reaction["rct_spins"]]) + 1, 
-            }
-        except ValueError:
-            logging.warning(f"\tPROBLEM GENERATING COMPLEX FOR {reaction['label']}")
-            continue
+        logging.info(f"\tGENERATING COMPLEX FOR REACTION {reaction['label']}")
+        # try:
+        entrance_complex, exit_complex = make_complexes(
+            [r.molecule for r in reaction["reactants"]],
+            [p.molecule for p in reaction["products"]],
+            reaction["mapping"],
+            reaction["reacting_atoms_reactants"],
+            reaction["reacting_atoms_products"],
+            reaction["bonds_breaking"],
+            reaction["bonds_forming"],
+            reaction["rct_charges"],
+            reaction["rct_spins"],
+            reaction["pro_charges"],
+            reaction["pro_spins"]
+        )
+        entrance_exit_complexes[reaction["label"]] = {
+            "entrance_complex": entrance_complex,
+            "exit_complex": exit_complex,
+            "charge": sum(reaction["rct_charges"]),
+            "spin": sum([x - 1 for x in reaction["rct_spins"]]) + 1, 
+        }
+        # except ValueError:
+        #     logging.warning(f"\tPROBLEM GENERATING COMPLEX FOR REACTION {reaction['label']}")
+        #     continue
 
     return entrance_exit_complexes
 
@@ -66,6 +67,7 @@ def generate_geodesic_paths(
     geodesic_paths = dict()
 
     for label, complexes in entrance_exit_complexes.items():
+        logging.info(f"GENERATING PATH FOR REACTION {label}")
         geodesic_paths[label] = {
             "path": construct_geodesic_path(
                 complexes["entrance_complex"],
@@ -78,7 +80,7 @@ def generate_geodesic_paths(
     return geodesic_paths
 
 
-def generate_path_flows(
+def generate_path_flows_orca(
     geodesic_paths: Dict[str, Any],
     xc: str = "wb97m-v",
     basis: str = "ma-def2-svp",
@@ -93,6 +95,7 @@ def generate_path_flows(
     flows = list()
 
     for label, path in geodesic_paths.items():
+        logging.info(f"GENERATING FLOW FOR REACTION {label}")
         this_meta = copy.deepcopy(metadata)
 
         if this_meta is None:
@@ -112,8 +115,45 @@ def generate_path_flows(
                 opt_params=opt_params,
                 nprocs=nprocs,
                 copy_files=copy_files,
+                base_name=label,
                 metadata=metadata,
-                base_name=label
+            )
+        )
+
+    return flows
+
+
+def generate_path_flows_qchem(
+    geodesic_paths: Dict[str, Any],
+    method: str = "wb97m-v",
+    basis: str = "def2-svpd",
+    copy_files: str | Path | List[str | Path] | None = None,
+    metadata: Dict[str, Any] | None = None,
+    **calc_kwargs
+) -> List[jf.Flow]:
+    
+    flows = list()
+
+    for label, path in geodesic_paths.items():
+        logging.info(f"GENERATING FLOW FOR REACTION {label}")
+        this_meta = copy.deepcopy(metadata)
+
+        if this_meta is None:
+            this_meta = dict()
+
+        this_meta["reaction_label"] = label
+
+        flows.append(
+            path_static_flow_qchem(
+                path["path"],
+                charge=path["charge"],
+                spin_multiplicity=path["spin"],
+                method=method,
+                basis=basis,
+                copy_files=copy_files,
+                base_name=label,
+                metadata=metadata,
+                **calc_kwargs
             )
         )
 

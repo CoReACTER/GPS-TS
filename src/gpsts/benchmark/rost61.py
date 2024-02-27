@@ -5,11 +5,12 @@ from typing import Any, Dict, List
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
+from pymatgen.analysis.local_env import metal_edge_extender, OpenBabelNN
 
 from gpsts.utils import (
     MAX_BENCHMARK_REACTION_NUMATOMS,
     METAL_EDGE_EXTENDER_PARAMS,
+    oxygen_edge_extender,
     prepare_reaction_for_input
 )
 

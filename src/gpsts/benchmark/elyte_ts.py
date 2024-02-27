@@ -7,7 +7,7 @@ from monty.serialization import loadfn
 
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
+from pymatgen.analysis.local_env import metal_edge_extender, OpenBabelNN
 
 from gpsts.utils import (
     prepare_reaction_for_input,
