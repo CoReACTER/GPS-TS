@@ -21,6 +21,13 @@ from pymatgen.util.graph_hashing import weisfeiler_lehman_graph_hash
 from gpsts.atom_mapping import get_reaction_atom_mapping
 
 
+__author__ = "Evan Spotte-Smith"
+__maintainer__ = "Evan Spotte-Smith"
+__email__ = "espottesmith@gmail.com"
+__status__ = "Alpha"
+__date__ = "February 2024"
+
+
 METALS = [str(Element.from_Z(i)) for i in range(1, 87) if Element.from_Z(i).is_metal]
 
 METAL_EDGE_EXTENDER_PARAMS = {

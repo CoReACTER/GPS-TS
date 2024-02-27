@@ -14,6 +14,13 @@ from gpsts.utils import (
 )
 
 
+__author__ = "Evan Spotte-Smith"
+__maintainer__ = "Evan Spotte-Smith"
+__email__ = "espottesmith@gmail.com"
+__status__ = "Alpha"
+__date__ = "February 2024"
+
+
 def mg_from_bh9(path: Path) -> MoleculeGraph:
     with open(path) as file_obj:
         lines = file_obj.readlines()

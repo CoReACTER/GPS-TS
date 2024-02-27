@@ -14,6 +14,13 @@ from gpsts.utils import (
 )
 
 
+__author__ = "Evan Spotte-Smith"
+__maintainer__ = "Evan Spotte-Smith"
+__email__ = "espottesmith@gmail.com"
+__status__ = "Alpha"
+__date__ = "February 2024"
+
+
 SELLA_EXCLUDE_RXNS = [
     15, 17, 22, 43, 50, 53, 61, 72, 75, 80, 102, 130, 131, 136, 142, 144, 147, 168, 208, 216, 217, 228, 230, 233, 241
 ]

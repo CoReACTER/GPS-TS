@@ -36,7 +36,7 @@ def path_static_flow(
     opt_params: Dict[str, Any] | None = None,
     nprocs: int | None = None,
     copy_files: str | Path | List[str | Path] | None = None,
-    base_name: str = "Geodesic path + TS optimization",
+    base_name: str = "Geodesic path statics",
     metadata: Dict[str, Any] | None = None
 ):
 

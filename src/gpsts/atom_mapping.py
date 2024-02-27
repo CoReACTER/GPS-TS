@@ -10,6 +10,7 @@ from mip import BINARY, CBC, MINIMIZE, Model, xsum
 
 from pymatgen.analysis.graphs import MoleculeGraph
 
+
 __author__ = "Mingjian Wen, Evan Spotte-Smith"
 __maintainer__ = "Mingjian Wen"
 __email__ = "mjwen@uh.edu, espottesmith@gmail.com"

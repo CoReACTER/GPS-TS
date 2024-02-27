@@ -15,6 +15,13 @@ from gpsts.utils import (
 )
 
 
+__author__ = "Evan Spotte-Smith"
+__maintainer__ = "Evan Spotte-Smith"
+__email__ = "espottesmith@gmail.com"
+__status__ = "Alpha"
+__date__ = "February 2024"
+
+
 # From 10.1021/acs.jpclett.3c03279
 # Format: {name: {"molecule": mol, ...}, ...}
 REACTIONS_OX = [

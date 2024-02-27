@@ -95,8 +95,6 @@ def make_complexes(
     architector_params: Dict = dict()
 ):
 
-    # TODO: are we managing charge and spin effectively?
-
     # Convert reactants and products to ase Atoms objects
     rcts = list()
     for ir, r in enumerate(reactants):
