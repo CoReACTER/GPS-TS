@@ -233,13 +233,14 @@ ROST61_CHARGE_SPIN = {
 
 ROST61_REACTIONS_TO_PURSUE = [
     1, 2, 3, 6, 8, 9, 10, 11, 14, 15, 21, 24, 30, 33, 35, 39, 40, 41, 45, 46, 48, 50, 52, 54, 55,  # Straightforward
-    4, 5, 7, 12, 16, 17, 18, 20, 22, 23, 27, 28, 29, 31, 32, 34, 37, 38, 42, 49, 51, 53, 56, 57, 58, 59, 60, 61  # Hard
+    4, 5, 7, 12, 16, 17, 18, 20, 22, 23, 27, 28, 29, 31, 32, 34, 37, 38, 49, 51, 53, 56, 57, 58, 59, 60, 61  # Hard
 ]
 
 
 def process_rost61(
     xyz_dir: str | Path,
-    chosen_reactions: List[int] = ROST61_REACTIONS_TO_PURSUE
+    chosen_reactions: List[int] = ROST61_REACTIONS_TO_PURSUE,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
 
     reaction_data = list()
@@ -282,6 +283,6 @@ def process_rost61(
             logging.info(f"\t\tSKIPPING: reaction too large")
             continue
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ROST61:{rxn_id}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ROST61:{rxn_id}", clean=clean))
 
     return reaction_data

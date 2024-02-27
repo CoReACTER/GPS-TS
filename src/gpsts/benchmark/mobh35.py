@@ -54,7 +54,8 @@ MOBH_35_REACTIONS = {
 
 
 def process_mobh35(
-    xyz_dir: str | Path
+    xyz_dir: str | Path,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
 
     reaction_data = list()
@@ -98,6 +99,6 @@ def process_mobh35(
             logging.info(f"\t\tSKIPPING: reaction too large")
             continue 
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"MOBH35:{rxn_id}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"MOBH35:{rxn_id}", clean=clean))
 
     return reaction_data

@@ -391,7 +391,8 @@ CHARGES_LEDC_LEMC = {
 
 
 def process_ox(
-    data_json_path: str | Path
+    data_json_path: str | Path,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
     
     reaction_data = list()
@@ -428,15 +429,16 @@ def process_ox(
             # Reactants and products should always have the same atom mapping
             mapping = {(0, i): (0, i) for i in range(len(rct_mgs[0].molecule))}
 
-            reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, mapping=mapping, label=f"ELYTE-TS:(OX){rxn_id}"))
+            reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, mapping=mapping, label=f"ELYTE-TS:(OX){rxn_id}", clean=clean))
         else:
-            reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(OX){rxn_id}"))
+            reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(OX){rxn_id}", clean=clean))
 
     return reaction_data
 
 
 def process_pf6(
-    data_json_path: str | Path
+    data_json_path: str | Path,
+    clean: bool = True,
 ) -> List[Dict[str, Any]]:
     
     reaction_data = list()
@@ -474,13 +476,14 @@ def process_pf6(
             for sub_mg in mgs[pro].get_disconnected_fragments():
                 pro_mgs.append(sub_mg)
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(PF6){rxn_id}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(PF6){rxn_id}", clean=clean))
 
     return reaction_data
 
 
 def process_mg(
-    data_json_path: str | Path
+    data_json_path: str | Path,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
     
     reaction_data = list()
@@ -509,13 +512,14 @@ def process_mg(
         rct_mgs = [mgs[x] for x in reaction["reactants"]]
         pro_mgs = [mgs[x] for x in reaction["products"]]
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(MG){rxn_id}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(MG){rxn_id}", clean=clean))
 
     return reaction_data
 
 
 def process_hiprgen(
-    data_json_path: str | Path
+    data_json_path: str | Path,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
     
     reaction_data = list()
@@ -554,13 +558,14 @@ def process_hiprgen(
             pro_mg = metal_edge_extender(pro_mg, **METAL_EDGE_EXTENDER_PARAMS)
             pro_mgs.append(pro_mg)
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(HIPRGEN){rxn_id}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(HIPRGEN){rxn_id}", clean=clean))
 
     return reaction_data
 
 
 def process_kmc(
-    data_json_path: str | Path
+    data_json_path: str | Path,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
     reaction_data = list()
 
@@ -585,13 +590,14 @@ def process_kmc(
         rct_mgs = [mgs[x] for x in reaction["reactants"]]
         pro_mgs = [mgs[x] for x in reaction["products"]]
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(KMC){rxn_id}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(KMC){rxn_id}", clean=clean))
 
     return reaction_data
 
 
 def process_mesoscale(
-    data_json_path: str | Path
+    data_json_path: str | Path,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
     reaction_data = list()
 
@@ -615,7 +621,7 @@ def process_mesoscale(
         rct_mgs = [mgs[x] for x in reaction["reactants"]]
         pro_mgs = [mgs[x] for x in reaction["products"]]
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(MESOSCALE){rxn_id}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"ELYTE-TS:(MESOSCALE){rxn_id}", clean=clean))
 
     return reaction_data
 
@@ -679,7 +685,8 @@ def process_mesoscale(
 
 
 def process_ledc_lemc(
-    base_dir: str | Path
+    base_dir: str | Path,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
 
     reaction_data = list()
@@ -721,7 +728,8 @@ def process_ledc_lemc(
                     [rct_mg],
                     [pro_mg],
                     mapping=mapping,
-                    label=f"ELYTE-TS:(LEDC/LEMC){rxn_id}"
+                    label=f"ELYTE-TS:(LEDC/LEMC){rxn_id}",
+                    clean=clean
                 )
             )
         else:
@@ -729,7 +737,8 @@ def process_ledc_lemc(
                 prepare_reaction_for_input(
                     [rct_mg],
                     [pro_mg],
-                    label=f"ELYTE-TS:(LEDC/LEMC){rxn_id}"
+                    label=f"ELYTE-TS:(LEDC/LEMC){rxn_id}",
+                    clean=clean
                 )
             )
 
@@ -745,16 +754,17 @@ def process_elyte_ts(
     mesoscale_path: str | Path,
     # borate_aluminate_path: str | Path,
     ledc_lemc_path: str | Path,
+    clean: bool = True
 ):
     
     reaction_data = list()
-    reaction_data += process_ox(ox_path)
-    reaction_data += process_pf6(pf6_path)
-    reaction_data += process_mg(mg_path)
-    reaction_data += process_hiprgen(hiprgen_path)
-    reaction_data += process_kmc(kmc_path)
-    reaction_data += process_mesoscale(mesoscale_path)
+    reaction_data += process_ox(ox_path, clean=clean)
+    reaction_data += process_pf6(pf6_path, clean=clean)
+    reaction_data += process_mg(mg_path, clean=clean)
+    reaction_data += process_hiprgen(hiprgen_path, clean=clean)
+    reaction_data += process_kmc(kmc_path, clean=clean)
+    reaction_data += process_mesoscale(mesoscale_path, clean=clean)
     # reaction_data += process_borate_aluminate(borate_aluminate_path)
-    reaction_data += process_ledc_lemc(ledc_lemc_path)
+    reaction_data += process_ledc_lemc(ledc_lemc_path, clean=clean)
 
     return reaction_data

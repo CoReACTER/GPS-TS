@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from monty.serialization import loadfn
+
 import numpy as np
 
 from openbabel import openbabel, pybel
@@ -14,6 +16,7 @@ from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
 from pymatgen.analysis.local_env import metal_edge_extender, oxygen_edge_extender, OpenBabelNN
+from pymatgen.util.graph_hashing import weisfeiler_lehman_graph_hash
 
 from gpsts.atom_mapping import get_reaction_atom_mapping
 
@@ -116,7 +119,8 @@ def prepare_reaction_for_input(
     rct_mgs: List[MoleculeGraph],
     pro_mgs: List[MoleculeGraph],
     mapping: Optional[Dict[Tuple[int, int], Tuple[int, int]]] = None,
-    label: Optional[str] = None
+    label: Optional[str] = None,
+    clean: bool = False
 ) -> Dict[str, Any]:
 
     # Charges and spins
@@ -230,10 +234,26 @@ def prepare_reaction_for_input(
         if pb[1] not in reacting_atoms_products[pb[0]]:
             reacting_atoms_products[pb[0]].append(pb[1])
 
+    reactant_graph_hashes = [
+        weisfeiler_lehman_graph_hash(x.graph.to_undirected(), node_attr="specie")
+        for x in rct_mgs
+    ]
+
+    product_graph_hashes = [
+        weisfeiler_lehman_graph_hash(x.graph.to_undirected(), node_attr="specie")
+        for x in pro_mgs
+    ]
+
+    if clean:
+        rct_mgs = [x.as_dict() for x in rct_mgs]
+        pro_mgs = [x.as_dict() for x in pro_mgs]
+
     reaction_data = {
         "label": label,
         "reactants": rct_mgs,
         "products": pro_mgs,
+        "reactant_graph_hashes": reactant_graph_hashes,
+        "product_graph_hashes": product_graph_hashes,
         "mapping": mapping,
         "reacting_atoms_reactants": reacting_atoms_reactants,
         "reacting_atoms_products": reacting_atoms_products,
@@ -246,3 +266,39 @@ def prepare_reaction_for_input(
     }
     
     return reaction_data
+
+
+def load_benchmark_data(data_path: str | Path) -> List[Dict[str, Any]]:
+    
+    data = loadfn(data_path)
+
+    processed_data = list()
+
+    for datum in data:
+
+        processed_datum = {
+            "label": datum["label"],
+            "reactants": datum["reactants"],
+            "products": datum["products"],
+            "reactant_graph_hashes": datum["reactant_graph_hashes"],
+            "product_graph_hashes": datum["product_graph_hashes"],
+        }
+
+        mapping = {eval(k): tuple(v) for k, v in datum["mapping"].items()}
+        processed_datum["mapping"] = mapping
+
+        for key in ["reacting_atoms_reactants", "reacting_atoms_products"]:
+            processed_datum[key] = {int(k): tuple(v) for k, v in datum[key].items()}
+
+        for key in ["bonds_breaking", "bonds_forming"]:
+            this_set = list()
+            for collection in datum[key]:
+                this_set.append((tuple(collection[0]), tuple(collection[1])))
+            processed_datum[key] = this_set
+        
+        for key in ["rct_charges", "rct_spins", "pro_charges", "pro_spins"]:
+            processed_datum[key] = {int(k): v for k, v in datum[key].items()}
+        
+        processed_data.append(processed_datum)
+    
+    return processed_data

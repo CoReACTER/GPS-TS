@@ -37,7 +37,8 @@ reactions = [
 
 
 def process_bh2o(
-    xyz_dir: str | Path
+    xyz_dir: str | Path,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
 
     if isinstance(xyz_dir, str):
@@ -109,6 +110,6 @@ def process_bh2o(
                         pro_mgs[0].molecule.set_charge_and_spin(0)
                     break
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"BH2O-36: {reaction}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"BH2O-36: {reaction}", clean=clean))
     
     return reaction_data

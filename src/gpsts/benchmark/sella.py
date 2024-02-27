@@ -22,6 +22,7 @@ SELLA_EXCLUDE_RXNS = [
 def process_sella_benchmark(
     base_dir: str | Path,
     exclude: List[int] = SELLA_EXCLUDE_RXNS,
+    clean: bool = True
 ):
 
     if isinstance(base_dir, str):
@@ -58,6 +59,6 @@ def process_sella_benchmark(
         rct_mgs = rct_mg.get_disconnected_fragments()
         pro_mgs = pro_mg.get_disconnected_fragments()
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"Sella: {rxn_id}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"Sella: {rxn_id}", clean=clean))
     
     return reaction_data

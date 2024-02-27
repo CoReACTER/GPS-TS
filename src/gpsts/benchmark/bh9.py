@@ -30,8 +30,12 @@ def mg_from_bh9(path: Path) -> MoleculeGraph:
     return mg
 
 
+exclude_bh9 = ["02_25"]
+
+
 def process_bh9(
-    xyz_dir: str | Path
+    xyz_dir: str | Path,
+    clean: bool = True
 ) -> List[Dict[str, Any]]:
 
     logging.info(f"BEGINNING PROCESSING BH9 DATASET WITH ROOT DIRECTORY: {xyz_dir}")
@@ -49,6 +53,10 @@ def process_bh9(
         rxn_id = ts_file.split("TS")[0]
         
         logging.info(f"\tProcessing reaction: {rxn_id}")
+
+        if rxn_id in exclude_bh9:
+            logging.info(f"\t\tSKIPPING: atom mapping problematic")
+            continue
 
         ts_mol = Molecule.from_file(xyz_dir / ts_file)
 
@@ -70,6 +78,6 @@ def process_bh9(
             logging.info(f"\t\tSKIPPING: reaction too large")
             continue
 
-        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"BH9:{rxn_id}"))
+        reaction_data.append(prepare_reaction_for_input(rct_mgs, pro_mgs, label=f"BH9:{rxn_id}", clean=clean))
 
     return reaction_data

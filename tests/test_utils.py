@@ -44,6 +44,8 @@ def test_construct_molecule_from_adjacency_matrix(test_dir):
 
 
 # TODO: add test with mapping pre-assigned
+# Also need to test `clean` option for dumping to JSON
+# Also also: need to test the graph hashing
 def test_prepare_reaction_for_input(molecules_1r1p, molecules_2r1p, molecules_2r2p):
     # Simple case: one reactant, one product
     # Test molecule graphs, and mapping
@@ -148,3 +150,6 @@ def test_prepare_reaction_for_input(molecules_1r1p, molecules_2r1p, molecules_2r
 
     assert inputs_2r2p["bonds_breaking"] == [((0, 2), (0, 6)), ((0, 5), (0, 9))]
     assert inputs_2r2p["bonds_forming"] == [((1, 0), (0, 6)), ((1, 1), (0, 9))]
+
+
+# TODO: test for data loading
