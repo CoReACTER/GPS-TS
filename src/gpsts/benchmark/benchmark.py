@@ -33,29 +33,29 @@ def generate_benchmark_complexes(
 
     for reaction in raw_data:
         logging.info(f"\tGENERATING COMPLEX FOR REACTION {reaction['label']}")
-        # try:
-        entrance_complex, exit_complex = make_complexes(
-            [r.molecule for r in reaction["reactants"]],
-            [p.molecule for p in reaction["products"]],
-            reaction["mapping"],
-            reaction["reacting_atoms_reactants"],
-            reaction["reacting_atoms_products"],
-            reaction["bonds_breaking"],
-            reaction["bonds_forming"],
-            reaction["rct_charges"],
-            reaction["rct_spins"],
-            reaction["pro_charges"],
-            reaction["pro_spins"]
-        )
-        entrance_exit_complexes[reaction["label"]] = {
-            "entrance_complex": entrance_complex,
-            "exit_complex": exit_complex,
-            "charge": sum(reaction["rct_charges"]),
-            "spin": sum([x - 1 for x in reaction["rct_spins"]]) + 1, 
-        }
-        # except ValueError:
-        #     logging.warning(f"\tPROBLEM GENERATING COMPLEX FOR REACTION {reaction['label']}")
-        #     continue
+        try:
+            entrance_complex, exit_complex = make_complexes(
+                [r.molecule for r in reaction["reactants"]],
+                [p.molecule for p in reaction["products"]],
+                reaction["mapping"],
+                reaction["reacting_atoms_reactants"],
+                reaction["reacting_atoms_products"],
+                reaction["bonds_breaking"],
+                reaction["bonds_forming"],
+                reaction["rct_charges"],
+                reaction["rct_spins"],
+                reaction["pro_charges"],
+                reaction["pro_spins"]
+            )
+            entrance_exit_complexes[reaction["label"]] = {
+                "entrance_complex": entrance_complex,
+                "exit_complex": exit_complex,
+                "charge": sum(reaction["rct_charges"]),
+                "spin": sum([x - 1 for x in reaction["rct_spins"]]) + 1, 
+            }
+        except ValueError:
+            logging.warning(f"\tPROBLEM GENERATING COMPLEX FOR REACTION {reaction['label']}")
+            continue
 
     return entrance_exit_complexes
 
