@@ -22,7 +22,9 @@ __date__ = "February 2024"
 
 
 PROBLEM_LABELS = [
-    "Sella: 100"
+    "Sella: 100",
+    "Sella: 181",
+    
 ]
 
 
