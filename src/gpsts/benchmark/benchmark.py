@@ -41,6 +41,7 @@ def generate_benchmark_complexes(
 
         if reaction["label"] in PROBLEM_LABELS:
             logging.warning(f"\tSKIPPING REACTION {reaction['label']}: KNOWN PROBLEM")
+            continue
         try:
             entrance_complex, exit_complex = make_complexes(
                 [r.molecule for r in reaction["reactants"]],
