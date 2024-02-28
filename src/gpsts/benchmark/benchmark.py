@@ -21,6 +21,11 @@ __status__ = "Alpha"
 __date__ = "February 2024"
 
 
+PROBLEM_LABELS = [
+    "Sella: 100"
+]
+
+
 def generate_benchmark_complexes(
     path: str | Path
 ) -> Dict[str, Any]:
@@ -33,6 +38,9 @@ def generate_benchmark_complexes(
 
     for reaction in raw_data:
         logging.info(f"\tGENERATING COMPLEX FOR REACTION {reaction['label']}")
+
+        if reaction["label"] in PROBLEM_LABELS:
+            logging.warning(f"\tSKIPPING REACTION {reaction['label']}: KNOWN PROBLEM")
         try:
             entrance_complex, exit_complex = make_complexes(
                 [r.molecule for r in reaction["reactants"]],
