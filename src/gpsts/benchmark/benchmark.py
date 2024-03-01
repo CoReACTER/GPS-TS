@@ -61,8 +61,8 @@ def generate_benchmark_complexes(
             entrance_exit_complexes[reaction["label"]] = {
                 "entrance_complex": entrance_complex,
                 "exit_complex": exit_complex,
-                "charge": sum(reaction["rct_charges"]),
-                "spin": sum([x - 1 for x in reaction["rct_spins"]]) + 1, 
+                "charge": sum(list(reaction["rct_charges"].values())),
+                "spin": sum([x - 1 for x in list(reaction["rct_spins"].values())]) + 1, 
             }
         except ValueError:
             logging.warning(f"\tPROBLEM GENERATING COMPLEX FOR REACTION {reaction['label']}")
