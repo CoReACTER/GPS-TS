@@ -21,6 +21,7 @@ __status__ = "Alpha"
 __date__ = "February 2024"
 
 
+# Reactant and product IDs for reactions in MOBH35
 MOBH_35_REACTIONS = {
     "R1": {"reactant": ["r1+"], "product": ["p1+"]},
     "R2": {"reactant": ["r2+"], "product": ["p2+"]},
@@ -64,6 +65,19 @@ def process_mobh35(
     xyz_dir: str | Path,
     clean: bool = True
 ) -> List[Dict[str, Any]]:
+
+    """
+
+    Generate benchmark data set from the reactions in MOBH35
+
+    Args:
+        xyz_dir (str | Path): Path to a directory where *.xyz files are stored
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
 
     reaction_data = list()
 

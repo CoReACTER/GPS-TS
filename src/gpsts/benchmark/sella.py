@@ -33,6 +33,20 @@ def process_sella_benchmark(
     clean: bool = True
 ):
 
+    """
+
+    Generate benchmark data set from the reactions in ROST61
+
+    Args:
+        base_dir (str | Path): Path to a directory where *.xyz files and bond information are stored
+        exclude (List[int]): List of reaction IDs that should not be included in the benchmark set.
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
+
     if isinstance(base_dir, str):
         base_dir = Path(base_dir)
 

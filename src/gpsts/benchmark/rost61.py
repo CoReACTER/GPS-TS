@@ -239,6 +239,8 @@ ROST61_CHARGE_SPIN = {
     150: (-1, 2)
 }
 
+# Not all reactions in ROST61 are reasonable to pursue
+# Some definitely do not reflect elementary steps or involve too many reactants/products
 ROST61_REACTIONS_TO_PURSUE = [
     1, 2, 3, 6, 8, 9, 10, 11, 14, 15, 21, 24, 30, 33, 35, 39, 40, 41, 45, 46, 48, 50, 52, 54, 55,  # Straightforward
     4, 5, 7, 12, 16, 17, 18, 20, 22, 23, 27, 28, 29, 31, 32, 34, 37, 38, 49, 51, 53, 56, 57, 58, 59, 60, 61  # Hard
@@ -250,6 +252,21 @@ def process_rost61(
     chosen_reactions: List[int] = ROST61_REACTIONS_TO_PURSUE,
     clean: bool = True
 ) -> List[Dict[str, Any]]:
+
+    """
+
+    Generate benchmark data set from the reactions in ROST61
+
+    Args:
+        xyz_dir (str | Path): Path to a directory where *.xyz files are stored
+        chosen_reactions (List[int]): List of reaction IDs that should be included in the benchmark set. Default is
+            the ROST61_REACTIONS_TO_PURSUE list; see `gpsts.benchmark.rost61.py`
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
 
     reaction_data = list()
 

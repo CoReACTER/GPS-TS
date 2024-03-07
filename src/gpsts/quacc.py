@@ -62,10 +62,10 @@ def path_static_flow_orca(
             from Mardirossian and Head-Gordon [1])
         basis (str): Basis set (default is "ma-def2-svp", the "minimally augmented" split-valence basis set based on
             the def2-SVP Karlsruhe basis set [2])
-        orcasimpleinput (List[str]): List of ORCA "simple input" commands. For instance, include "SlowConv" to use
+        orcasimpleinput (List[str] | None): List of ORCA "simple input" commands. For instance, include "SlowConv" to use
             parameters for more challenging SCF optimization cases, or "RIJCOSX" to use a linear scaling approximation.
             Default is None
-        orcablocks (List[str]): List of "blocks" for an ORCA input file. For instance, '%scf convergence Tight end'
+        orcablocks (List[str] | None): List of "blocks" for an ORCA input file. For instance, '%scf convergence Tight end'
             could be included to specify that SCF optimization should use more stringent convergence criteria. Default
             is None
         nprocs (int): Number of processes to be used for this calculation. Default is None, meaning that one process

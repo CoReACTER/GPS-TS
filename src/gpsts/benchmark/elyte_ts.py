@@ -1,14 +1,18 @@
+# stdlib
 import logging
 from glob import glob
 from pathlib import Path
 from typing import Any, Dict, List
 
+# Loading from JSON and zipped JSON
 from monty.serialization import loadfn
 
+# Molecule and associated graph representations
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
 from pymatgen.analysis.local_env import metal_edge_extender, OpenBabelNN
 
+# Utilities
 from gpsts.utils import (
     prepare_reaction_for_input,
     METAL_EDGE_EXTENDER_PARAMS
@@ -401,6 +405,19 @@ def process_ox(
     data_json_path: str | Path,
     clean: bool = True
 ) -> List[Dict[str, Any]]:
+
+    """
+
+    Generate benchmark data set from the reactions in the electrolyte dataset's "oxidation" subset
+
+    Args:
+        data_json_path (str | Path): Path to an input JSON file
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
     
     reaction_data = list()
 
@@ -447,6 +464,19 @@ def process_pf6(
     data_json_path: str | Path,
     clean: bool = True,
 ) -> List[Dict[str, Any]]:
+
+    """
+
+    Generate benchmark data set from the reactions in the electrolyte dataset's "pf6" subset
+
+    Args:
+        data_json_path (str | Path): Path to an input JSON file
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
     
     reaction_data = list()
 
@@ -492,6 +522,19 @@ def process_mg(
     data_json_path: str | Path,
     clean: bool = True
 ) -> List[Dict[str, Any]]:
+
+    """
+
+    Generate benchmark data set from the reactions in the electrolyte dataset's "mg" subset
+
+    Args:
+        data_json_path (str | Path): Path to an input JSON file
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
     
     reaction_data = list()
 
@@ -528,6 +571,19 @@ def process_hiprgen(
     data_json_path: str | Path,
     clean: bool = True
 ) -> List[Dict[str, Any]]:
+
+    """
+
+    Generate benchmark data set from the reactions in the electrolyte dataset's "hiprgen" subset
+
+    Args:
+        data_json_path (str | Path): Path to an input JSON file
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
     
     reaction_data = list()
 
@@ -574,6 +630,20 @@ def process_kmc(
     data_json_path: str | Path,
     clean: bool = True
 ) -> List[Dict[str, Any]]:
+
+    """
+
+    Generate benchmark data set from the reactions in the electrolyte dataset's "kmc" subset
+
+    Args:
+        data_json_path (str | Path): Path to an input JSON file
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
+
     reaction_data = list()
 
     logging.info(f"\tBEGINNING PROCESSING KMC DATASET FROM: {data_json_path}")
@@ -606,6 +676,20 @@ def process_mesoscale(
     data_json_path: str | Path,
     clean: bool = True
 ) -> List[Dict[str, Any]]:
+
+    """
+
+    Generate benchmark data set from the reactions in the electrolyte dataset's "mesoscale" subset
+
+    Args:
+        data_json_path (str | Path): Path to an input JSON file
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
+
     reaction_data = list()
 
     logging.info(f"\tBEGINNING PROCESSING MESOSCALE DATASET FROM: {data_json_path}")
@@ -696,6 +780,19 @@ def process_ledc_lemc(
     clean: bool = True
 ) -> List[Dict[str, Any]]:
 
+    """
+
+    Generate benchmark data set from the reactions in the electrolyte dataset's "ledc_lemc" subset
+
+    Args:
+        base_dir (str | Path): Path to a directory where *.xyz files are stored
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
+
     reaction_data = list()
 
     logging.info(f"\tBEGINNING PROCESSING LEDC/LEMC DATASET FROM: {base_dir}")
@@ -763,6 +860,25 @@ def process_elyte_ts(
     ledc_lemc_path: str | Path,
     clean: bool = True
 ):
+
+    """
+
+    Generate benchmark data set from the reactions in the electrolyte dataset.
+
+    Args:
+        ox_path (str | Path): Path to an input JSON file for the "oxidation" subset
+        pf6_path (str | Path): Path to an input JSON file for the "pf6" subset
+        mg_path (str | Path): Path to an input JSON file for the "mg" subset
+        hiprgen_path (str | Path): Path to an input JSON file for the "hiprgen" subset
+        kmc_path (str | Path): Path to an input JSON file for the "kmc" subset
+        mesoscale_path (str | Path): Path to an input JSON file for the "mesoscale" subset
+        ledc_lemc_path (str | Path): Path to a directory where *.xyz files are stored for the "ledc_lemc" subset
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
     
     reaction_data = list()
     reaction_data += process_ox(ox_path, clean=clean)

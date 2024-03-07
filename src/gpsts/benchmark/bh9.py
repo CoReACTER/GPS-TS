@@ -1,15 +1,17 @@
+# stdlib
 import logging
 from glob import glob
 from pathlib import Path
 from typing import Any, Dict, List
 
+# Molecule and molecule graph representations
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import metal_edge_extender, OpenBabelNN
+from pymatgen.analysis.local_env import OpenBabelNN
 
+# Utilities
 from gpsts.utils import (
     MAX_BENCHMARK_REACTION_NUMATOMS,
-    METAL_EDGE_EXTENDER_PARAMS,
     oxygen_edge_extender,
     prepare_reaction_for_input
 )
@@ -22,7 +24,24 @@ __status__ = "Alpha"
 __date__ = "February 2024"
 
 
+# Causes problems with atom mapping
+exclude_bh9 = ["02_25"]
+
+
 def mg_from_bh9(path: Path) -> MoleculeGraph:
+
+    """
+    
+    Create a MoleculeGraph for a BH9 molecule from an *.xyz file
+
+    Args:
+        path (Path): Path to *.xyz file
+    
+    Returns:
+        mg (MoleculeGraph): Graph representation of the molecule based on this *.xyz file
+
+    """
+
     with open(path) as file_obj:
         lines = file_obj.readlines()
         charge, spin = lines[1].strip().split()
@@ -32,19 +51,28 @@ def mg_from_bh9(path: Path) -> MoleculeGraph:
     mol = Molecule.from_file(path)
     mol.set_charge_and_spin(charge, spin_multiplicity=spin)
     mg = MoleculeGraph.with_local_env_strategy(mol, OpenBabelNN())
-    mg = metal_edge_extender(mg, **METAL_EDGE_EXTENDER_PARAMS)
     mg = oxygen_edge_extender(mg)
 
     return mg
-
-
-exclude_bh9 = ["02_25"]
 
 
 def process_bh9(
     xyz_dir: str | Path,
     clean: bool = True
 ) -> List[Dict[str, Any]]:
+    
+    """
+
+    Generate benchmark data set from the reactions in the BH9 dataset
+
+    Args:
+        xyz_dir (str | Path): Path to directory where BH9 *.xyz files are stored
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
 
     logging.info(f"BEGINNING PROCESSING BH9 DATASET WITH ROOT DIRECTORY: {xyz_dir}")
 

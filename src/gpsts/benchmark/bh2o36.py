@@ -1,12 +1,15 @@
+# stdlib
 import logging
 from glob import glob
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+# Molecule and molecule graph representations
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
 from pymatgen.analysis.local_env import OpenBabelNN
 
+# Utility functions
 from gpsts.utils import (
     construct_molecule_from_adjacency_matrix,
     oxygen_edge_extender,
@@ -22,6 +25,9 @@ __status__ = "Alpha"
 __date__ = "February 2024"
 
 
+# Reactions from BH2O-36 that can be included in this benchmark
+# For now, ignore all water-assisted reactions
+# TODO: eventually, would be nice if we could handle water-assisted mechanisms, water wires, etc.
 reactions = [
     "aceticanhydride",
     # "amide_2_1",
@@ -48,6 +54,19 @@ def process_bh2o(
     xyz_dir: str | Path,
     clean: bool = True
 ) -> List[Dict[str, Any]]:
+
+    """
+
+    Generate benchmark data set from the reactions in the BH2O-36 dataset
+
+    Args:
+        xyz_dir (str | Path): Path to directory where BH2O-36 *.xyz files are stored
+        clean (bool): If True (default True), process reaction data so that they can be easily dumped as a JSON file
+
+    Returns:
+        reaction_data (List[Dict[str, Any]]): List of data points
+
+    """
 
     if isinstance(xyz_dir, str):
         xyz_dir = Path(xyz_dir)
