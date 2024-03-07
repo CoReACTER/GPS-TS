@@ -31,6 +31,37 @@ def construct_geodesic_path(
     maximum_iterations: int = 20,
     max_sweep_microiterations: int = 20
 ):
+    """
+
+    Construct a geodesic path linking an entrance complex to an exit complex. This method is based on the work of
+    Zhu et al. (see References) and the `geodesic_interpolate` code
+    (https://github.com/virtualzx-nad/geodesic-interpolate).
+    
+    Args:
+        entrance_complex (Atoms): Entrance complex, as an ASE Atoms object
+        exit_complex (Atoms): Exit complex, as an ASE Atoms object
+        nimages (int): Number of points included in the geodesic path. This number must be at least 3 (default is 20).
+            Note that the first image will be the `entrance_complex`, and the last image will be the `exit_complex`
+        morse_scaling (float): Exponential parameter for the Morse potential
+        initial_tolerance (float): Tolerance for initial generation of distributed interpolated structures (default
+            is 0.02, taken from `geodesic_interpolate`) 
+        tolerance (float): Convergence tolerance (default is 0.002, taken from `geodesic_interpolate`)
+        friction (float): Friction term used to prevent large changes in geometry. (default is 0.01, taken from
+            `geodesic_interpolate`)
+        distance_cutoff (float): Distance cutoff for a bond between two atoms to be included in the coordinate system
+            (default is 3A, taken from `geodesic_interpolate`)
+        maximum_iterations (int): Maximum number of iterations for minimization (default is 20)
+        max_sweep_microiterations (int): Maximum number of micro-iterations (default is 20, taken from `geodesic_interpolate`)
+
+    Returns:
+        path_atoms (List[Atoms]): Structures along the geodesic path, represented as ASE Atoms objects
+
+
+    References:
+    `Geodesic interpolation for reaction pathways`,
+    J. Chem. Phys. 2019, 150(16), 164103, https://doi.org/10.1063/1.5090303.
+
+    """
 
     if nimages < 3:
         raise ValueError("Number of images must be at least 3!")

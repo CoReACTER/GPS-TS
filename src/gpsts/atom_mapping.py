@@ -2,12 +2,17 @@
 # Distributed under the terms of the GPL version 3.
 # Code taken/heavily inspired by https://github.com/BlauGroup/mrnet
 
+# stdlib
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Union
 
+# Basic numeric/scientific python libraries
 import numpy as np
+
+# Mixed-integer (linear) programming library
 from mip import BINARY, CBC, MINIMIZE, Model, xsum
 
+# For molecule representation
 from pymatgen.analysis.graphs import MoleculeGraph
 
 
@@ -210,16 +215,16 @@ def get_local_global_atom_index_mapping(
     where N1, N2, and N3 are the number of atoms in molecules 1, 2, and 3.
 
     Args:
-        molecules: A sequence of molecule entry.
+        molecules: A sequence of molecule graphs.
 
     Returns:
-        global_species: species of atoms in the combined molecule.
-        global_bonds: all bonds in the combine molecule; each bond is specified by a
+        global_species (List[str]): species of atoms in the combined molecule.
+        global_bonds (List[Bond]): all bonds in the combine molecule; each bond is specified by a
             tuple of global atom index.
-        local_to_global: local atom index to global atom index. Each inner list holds
+        local_to_global (List[List[int]]): local atom index to global atom index. Each inner list holds
             the global atom indexes of a molecule. E.g. local_to_global[0][2] gives 4,
             meaning atom 2 of molecule 0 has a global index of 4.
-        global_to_local: global atom index to local atom index. Each tuple
+        global_to_local (List[Tuple[int, int]]): global atom index to local atom index. Each tuple
             (mol_index, atom_index) is for one atom, with `mol_index` the index of the
             molecule from which the atom is from and `atom_index` the local index of the
             atom in the molecule. E.g. global[4] gives a tuple (0, 2), meaning atom with
@@ -266,20 +271,20 @@ def solve_integer_programing(
     This is a utility function for `get_reaction_atom_mapping()`.
 
     Args:
-        reactant_species: species string of reactant atoms
-        product_species: species string of product atoms
-        reactant_bonds: bonds in reactant
-        product_bonds: bonds in product
-        msg: whether to show the solver running message to stdout.
-        threads: number of threads for the solver. `None` to use default.
+        reactant_species (List[str]): species string of reactant atoms
+        product_species (List[str]): species string of product atoms
+        reactant_bonds (List[Bond]): bonds in reactant
+        product_bonds (List[Bond]): bonds in product
+        msg (bool): whether to show the solver running message to stdout.
+        threads (Optional[int]): number of threads for the solver. `None` to use default.
 
     Returns:
-        objective: minimized objective value. This corresponds to the number of changed
+        objective (int): minimized objective value. This corresponds to the number of changed
             bonds (both broken and formed) in the reaction.
-        r2p_mapping: mapping of reactant atom to product atom, e.g. r2p_mapping[0]
+        r2p_mapping (List[Union[int, None]]): mapping of reactant atom to product atom, e.g. r2p_mapping[0]
             giving 3 means that reactant atom 0 maps to product atom 3. A value of
             `None` means a mapping cannot be found for the reactant atom.
-        p2r_mapping: mapping of product atom to reactant atom, e.g. p2r_mapping[3]
+        p2r_mapping (List[Union[int, None]]): mapping of product atom to reactant atom, e.g. p2r_mapping[3]
             giving 0 means that product atom 3 maps to reactant atom 0. A value of
             `None` means a mapping cannot be found for the product atom.
 
@@ -337,7 +342,7 @@ def solve_integer_programing(
             model += alpha_vars[(i, j, k, l)] <= y_vars[(i, k)] + y_vars[(i, l)]
             model += alpha_vars[(i, j, k, l)] <= y_vars[(j, k)] + y_vars[(j, l)]
 
-    # TODO: can we incorporate constraints 7-9
+    # TODO: can we incorporate constraints 7-9, which relate to stereochemistry?
 
     # create objective
     obj1 = xsum(
@@ -383,6 +388,22 @@ def get_atom_mapping_no_bonds(
     Get the atom mapping for reaction where there is no bonds in either the reactants
     or products. For example, a reaction C-O -> C + O.
 
+    Args:
+        reactant_species (List[str]): species string of reactant atoms
+        product_species (List[str]): species string of product atoms
+        reactant_bonds (List[Bond]): bonds in reactant
+        product_bonds (List[Bond]): bonds in product
+    Returns:
+        objective (int): minimized objective value. This corresponds to the number of changed
+            bonds (both broken and formed) in the reaction.
+        r2p_mapping (List[Union[int, None]]): mapping of reactant atom to product atom, e.g. r2p_mapping[0]
+            giving 3 means that reactant atom 0 maps to product atom 3. A value of
+            `None` means a mapping cannot be found for the reactant atom.
+        p2r_mapping (List[Union[int, None]]): mapping of product atom to reactant atom, e.g. p2r_mapping[3]
+            giving 0 means that product atom 3 maps to reactant atom 0. A value of
+            `None` means a mapping cannot be found for the product atom.
+
+
     This is a complement function to `solve_integer_programing()`, which cannot deal
     with the case where there is no bonds in the reactants or products.
 
@@ -426,11 +447,11 @@ def generate_atom_mapping_1_1(
     (keys in the dicts) are corresponding to each other.
 
     Args:
-        node_mapping: node mapping from reactant to product
+        node_mapping (Dict[int, int]): node mapping from reactant to product
 
     Returns:
-        reactant_atom_mapping: rdkit style atom mapping for the reactant
-        product_atom_mapping: rdkit style atom mapping for the product
+        reactant_atom_mapping (AtomMappingDict): rdkit style atom mapping for the reactant
+        product_atom_mapping (AtomMappingDict): rdkit style atom mapping for the product
     """
     reactant_atom_mapping = {k: k for k in node_mapping}
     product_atom_mapping = {v: k for k, v in node_mapping.items()}

@@ -152,4 +152,6 @@ def test_prepare_reaction_for_input(molecules_1r1p, molecules_2r1p, molecules_2r
     assert inputs_2r2p["bonds_forming"] == [((1, 0), (0, 6)), ((1, 1), (0, 9))]
 
 
+# TODO: test for atoms_to_molecule_graph
 # TODO: test for data loading
+# TODO: test for oxygen_edge_extender

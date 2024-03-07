@@ -1,15 +1,22 @@
+# stdlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+# Loading from e.g. JSON and zipped JSON files
 from monty.serialization import loadfn
 
+# n-dimensional arrays, etc.
 import numpy as np
 
+# Molecule representation, 3D structure generation, etc.
 from openbabel import openbabel, pybel
 
+# Molecule representation, mostly used for calculations and complex generation
 from ase import Atoms
 from ase.io import read
 
+# Molecule representations, including graph representations
+# Also tools for interconversion with ASE and OpenBabel
 from pymatgen.core.periodic_table import Element
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.babel import BabelMolAdaptor
@@ -18,6 +25,7 @@ from pymatgen.analysis.graphs import MoleculeGraph
 from pymatgen.analysis.local_env import metal_edge_extender, OpenBabelNN
 from pymatgen.util.graph_hashing import weisfeiler_lehman_graph_hash
 
+# Internal - atom mapping code
 from gpsts.atom_mapping import get_reaction_atom_mapping
 
 
@@ -28,6 +36,7 @@ __status__ = "Alpha"
 __date__ = "February 2024"
 
 
+# "Constants" or standard parameters
 METALS = [str(Element.from_Z(i)) for i in range(1, 87) if Element.from_Z(i).is_metal]
 
 METAL_EDGE_EXTENDER_PARAMS = {
@@ -44,17 +53,73 @@ def atoms_to_molecule_graph(
     charge: int = 0,
     spin_multiplicity: int = 1,
 ) -> MoleculeGraph:
+    """
+
+    Utility function to convert an ASE `Atoms` object to a pymatgen `MoleculeGraph` object
+
+    Args:
+        atoms (Atoms): Molecule as an ASE `Atoms` object
+        charge (int): Integral charge of the molecule
+        spin_multiplicity (int): Integral spin multiplicity of the molecule
+
+    Returns:
+        mg (MoleculeGraph): MoleculeGraph based on the provided `atoms`
+
+    """
+
+    # Need to provide for ASEAtomsAdaptor
     atoms.charge = charge
     atoms.spin_multiplicity = spin_multiplicity
+
     mol = AseAtomsAdaptor.get_molecule(atoms)
     mg = MoleculeGraph.with_local_env_strategy(mol, OpenBabelNN())
     mg = metal_edge_extender(mg, **METAL_EDGE_EXTENDER_PARAMS)
+    # TODO: should we include oxygen_edge_extender here?
+    
     return mg
 
 
 def read_adjacency_matrix(
     file: str | Path,
 ) -> np.ndarray:
+    """
+
+    Read in an adjacency matrix from a file.
+    
+    This utility function is used to generate benchmark reactions from the `sella` paper [1] and subsequent
+    (unpublished) work by the groups of Blau and Head-Gordon.
+
+    Args:
+        file (str | Path): Path to a file where the adjacency matrix is stored.
+            Note that this function assumes a format with no header, where each line is a space-separated list of
+            either 0 (no bond) or 1 (bond), e.g.
+
+            0 1 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0
+            1 0 1 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0
+            0 1 0 1 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0
+            0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+            0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 1 1 0
+            0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+            0 0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 1
+            0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0
+            1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0
+            0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+            0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+    Returns:
+        array (np.ndarray): The adjacency matrix as a numpy array
+
+    """
+
     if isinstance(file, str):
         file = Path(file)
 
@@ -76,6 +141,23 @@ def construct_molecule_from_adjacency_matrix(
     matrix: np.ndarray,
     optimization_steps: int = 500
 ) -> Molecule:
+
+    """
+
+    Generate a 3D molecular structure from an adjacency matrix, primarily using OpenBabel
+
+    Args:
+        initial_structure (Molecule): base molecule to be used to generate a new structure
+            with specified bonds
+        matrix (np.ndarray): Adjacency matrix. Values are either 0 (no bond) or 1 (bond),
+            and the shape is nxn, where `n` is the number of atoms in the molecule
+        optimization_steps (int): Maximum number of steps for rough, force-field based optimization in OpenBabel.
+            Default is 500
+
+    Returns:
+        output_mol (Molecule): pymatgen Molecule object
+
+    """
     
     # Have to go through OpenBabel to make a reasonable structure based on bond orders
     # This code is taken from pymatgen - thanks Shyue Ping Ong and Qi Wang
@@ -129,6 +211,26 @@ def prepare_reaction_for_input(
     label: Optional[str] = None,
     clean: bool = False
 ) -> Dict[str, Any]:
+
+    """
+
+    Prepare an input for `gpsts.complexes.make_complexes` based on a collection of reactant and product molecule
+    graphs.
+
+    Args:
+        rct_mgs (List[MoleculeGraph]): Molecule graph representations for each reactant in this reaction
+        pro_mgs (List[MoleculeGraph]): Molecule graph representations for each product in this reaction
+        mapping (Optional[Dict[Tuple[int, int], Tuple[int, int]]]): Atom mapping between reactants and products.
+            Default is None, meaning that an atom mapping will be generated
+        label (Optional[str]): String label used to tag this reaction. Default is None.
+        clean (bool): If True (default False), then convert MoleculeGraph objects to dictionaries to enable
+            dumping
+
+    Returns:
+        reaction_data (Dict[str, Any]): Input dictionary, where keys are input parameters for `make_complexes` and
+            values are relevant inputs for this reaction
+
+    """
 
     # Charges and spins
     rct_charges = {i: e.molecule.charge for i, e in enumerate(rct_mgs)}
@@ -276,6 +378,17 @@ def prepare_reaction_for_input(
 
 
 def load_benchmark_data(data_path: str | Path) -> List[Dict[str, Any]]:
+    """
+
+    Load a collection of reactions from a dumped JSON or gzipped JSON file
+
+    Args:
+        data_path (str | Path): Path to dumped benchmark data file
+
+    Returns:
+        processed_data (List[Dict[str, Any]]): Parsed data
+
+    """
     
     data = loadfn(data_path)
 
@@ -313,8 +426,8 @@ def load_benchmark_data(data_path: str | Path) -> List[Dict[str, Any]]:
 
 def oxygen_edge_extender(
     mol_graph: MoleculeGraph,
-    hydrogen_cutoff: int = 1.2,
-    carbon_cutoff: int = 1.7
+    hydrogen_cutoff: float = 1.2,
+    carbon_cutoff: float = 1.7
 ) -> MoleculeGraph:
     """
     Identify and add missed O-C or O-H bonds. This is particularly
@@ -323,12 +436,12 @@ def oxygen_edge_extender(
 
     TODO:
         - This should be in pymatgen
-        - This should be generalized and should have flexible parameters, like metal_edge_extender
+        - This should be generalized and should have flexible parameters, more like metal_edge_extender
 
     Args:
         mol_graph (MoleculeGraph): molecule graph to extend
-        hydrogen_cutoff (int):
-        carbon_cutoff (int):
+        hydrogen_cutoff (float): 
+        carbon_cutoff (float):
 
     Returns:
         MoleculeGraph: object with additional O-C or O-H bonds added (if any found)

@@ -5,6 +5,9 @@
 from typing import Any, List, Dict, Optional, Tuple, Union
 import random
 
+# Basic numeric/scientific python libraries
+import numpy as np
+
 # For reaction complex formation
 from architector import view_structures, convert_io_molecule
 import architector.io_arch_dock as io_arch_dock
@@ -14,9 +17,6 @@ from architector.io_molecule import Molecule as ArchMol
 from ase import Atoms
 from pymatgen.core.structure import Molecule
 from pymatgen.io.ase import AseAtomsAdaptor
-
-# Basic numeric/scientific python libraries
-import numpy as np
 
 
 __author__ = "Evan Spotte-Smith"
@@ -33,6 +33,24 @@ def make_complex(
     reacting_atom_other: int,
     params: Dict = dict()  # Can pass any normal Architector param here
 ):
+    """
+    Use Architector to create a complex, where the `other` molecule is
+    noncovalently bound to the `core` molecule.
+
+    Args:
+        core (architector.io_molecule.Molecule, aka ArchMol): the core of the complex
+        other (ArchMol): the molecule that will be (noncovalently) attached to the `core`
+        reacting_atom_core (int): 0-based index of the atom in the `core` that will be connected to the `other` 
+        reacting_atom_other (int): 0-based index of the atom in `other` that will be connected to the `core`
+        params (Dict): Architector parameter dict; see Architector for details
+
+    Returns:
+        binding (Tuple[ArchMol, List[ArchMol]]): New complex combining `core` and `other`.
+
+    References:
+        `Architector for high-throughput cross-periodic table 3D complex building`,
+        Nat. Commun. 2023, 14(1), p.2786, https://doi.org/10.1038/s41467-023-38169-2.
+    """
     
     params['species_list'] = [other]
     params['species_location_method'] = 'targeted'
@@ -48,7 +66,28 @@ def make_complex(
 def select_central_molecule(
     molecules: List[ArchMol], 
     reacting_atoms: Dict[int, List[int]]
-):
+) -> Tuple[int, ArchMol]:
+    """
+    From a collection of reacting molecules, identify which will be the `core` of the reacting complex.
+
+    Currently, we somewhat naively choose the molecule with the most atoms involved in the reaction.
+    If there is a tie, then the larger molecule is chosen to be the core.
+    
+    Note that this procedure may be subject to change in future versions.
+
+    Args:
+        molecules (List[architector.io_molecule.Molecule, aka ArchMol]): List of reacting molecules
+        reacting_atoms (Dict[int, List[int]]): Map {molecule_index: atom_indices}, where `molecule_index`
+            is the 0-based index of the molecule in `molecules` and `atom_indices` is a list of (0-based)
+            indices of atoms in that molecule involved in the reaction (typically, these are atoms that have
+            bonds changing in the reaction)
+
+    Returns:
+        central_index (int): Index of the atom to be used as the core of the complex
+        central_mol (ArchMol): The chosen central molecule
+
+    """
+
     # Pick one molecule to be the center
     # Arbitrarily, we choose the molecule with the most reacting atoms
     # If there's a tie, we choose the one that's largest
@@ -93,7 +132,61 @@ def make_complexes(
     reactant_core: Optional[int] = None,
     product_core: Optional[int] = None,
     architector_params: Dict = dict()
-):
+) -> Tuple[Atoms, Atoms]:
+
+    """
+
+    Generate entrance and exit complexes for a reaction defined by a set of reactants and a set of products.
+
+    Args:
+        reactants (List[Union[Molecule, Atoms]]): Collection of reactant molecules, either as pymatgen Molecule objects
+            or ASE Atoms objects
+        products (List[Union[Molecule, Atoms]]): Collection of product molecules, either as pymatgen Molecule objects
+            or ASE Atoms objects
+        mapping (Dict[Tuple[int, int], Tuple[int, int]]): Atom mapping between reactants (keys) and products (values).
+            Both keys and values are tuples (mol_ind, atom_ind), where `mol_ind` is the 0-based index of the molecule
+            in `reactants` or `products` and `atom_ind` is the 0-based index of the atom in that molecule
+        reacting_atoms_reactants (Dict[int, List[int]]): Key-value pair {mol_ind: atom_inds}, where `mol_ind` is the
+            0-based index of the molecule in `reactants` and `atom_inds` is a list of atom indices in the molecule that
+            are involved in the reaction. Typically, "involved in the reaction" means that the atom has some bonds that
+            form or break during the reaction
+        reacting_atoms_products (Dict[int, List[int]]): Key-value pair {mol_ind: atom_inds}, where `mol_ind` is the
+            0-based index of the molecule in `products` and `atom_inds` is a list of atom indices in the molecule that
+            are involved in the reaction. Typically, "involved in the reaction" means that the atom has some bonds that
+            form or break during the reaction
+        bonds_breaking (List[Tuple[Tuple[int, int], Tuple[int, int]]]): Bonds in `reactants` that break during the
+            reaction. This collection is formatted as ((mol_1_ind, atom_1_ind), (mol_2_ind, atom_2_ind)), where
+            `mol_x_ind` is the 0-based index of the xth molecule in `reactants` and `atom_x_ind` is the 0-based index
+            of the atom in the xth molecule that is involved in this bond
+        bonds_forming (List[Tuple[Tuple[int, int], Tuple[int, int]]]): Bonds in `reactants` that form during the
+            reaction. This collection is formatted as ((mol_1_ind, atom_1_ind), (mol_2_ind, atom_2_ind)), where
+            `mol_x_ind` is the 0-based index of the xth molecule in `reactants` and `atom_x_ind` is the 0-based index
+            of the atom in the xth molecule that is involved in this bond
+        rct_charges (Dict[int, int]): Charges of the molecules in `reactants`. Keys are 0-based indexes of the
+            molecules in `reactants`, and values are integral charges
+        rct_spins (Dict[int, int]): Spin multiplicities of the molecules in `reactants`. Keys are 0-based indexes of
+            the molecules in `reactants`, and values are integral spin multiplicities
+        pro_charges (Dict[int, int]): Charges of the molecules in `products`. Keys are 0-based indexes of the
+            molecules in `products`, and values are integral charges
+        pro_spins (Dict[int, int]): Spin multiplicities of the molecules in `products`. Keys are 0-based indexes of
+            the molecules in `products`, and values are integral spin multiplicities
+        reactant_core (Optional[int] = None): Index of the molecule in `reactants` that will serve as the "core" of
+            the entrance complex. Default is None, which means that this function will decide which molecule to use
+            as the core.
+        product_core (Optional[int] = None): Index of the molecule in `products` that will serve as the "core" of
+            the exit complex. Default is None, which means that this function will decide which molecule to use
+            as the core.
+        architector_params (Dict): Architector parameter dict; see Architector for details
+
+    Returns:
+        entrance_complex (Atoms): Entrance complex, as an ASE Atoms object
+        exit_complex (Atoms): Exit complex, as an ASE Atoms object
+
+    References:
+        `Architector for high-throughput cross-periodic table 3D complex building`,
+        Nat. Commun. 2023, 14(1), p.2786, https://doi.org/10.1038/s41467-023-38169-2.
+
+    """
 
     # Convert reactants and products to ase Atoms objects
     rcts = list()
