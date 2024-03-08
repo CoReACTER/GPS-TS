@@ -50,8 +50,8 @@ MAX_BENCHMARK_REACTION_NUMATOMS = 30
 
 def atoms_to_molecule_graph(
     atoms: Atoms,
-    charge: int = 0,
-    spin_multiplicity: int = 1,
+    charge: int,
+    spin_multiplicity: int,
 ) -> MoleculeGraph:
     """
 

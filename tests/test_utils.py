@@ -1,15 +1,30 @@
 import pytest
 
+from ase.io import read
+
 from pymatgen.core.structure import Molecule
 from pymatgen.analysis.graphs import MoleculeGraph
-from pymatgen.analysis.local_env import OpenBabelNN
+from pymatgen.analysis.local_env import OpenBabelNN, metal_edge_extender
 
 from gpsts.utils import (
     atoms_to_molecule_graph,
     construct_molecule_from_adjacency_matrix,
+    load_benchmark_data,
+    METAL_EDGE_EXTENDER_PARAMS,
+    oxygen_edge_extender,
     prepare_reaction_for_input,
     read_adjacency_matrix
 )
+
+
+@pytest.fixture(scope="session")
+def graph_mol(test_dir):
+    
+    atoms = read(test_dir / "graphs" / "furan1_pro_1.xyz", format="xyz")
+    mol = Molecule.from_file(test_dir / "graphs" / "furan1_pro_1.xyz")
+    mol.set_charge_and_spin(1)
+    
+    return atoms, mol
 
 
 def test_read_adjacency_matrix(test_dir):
@@ -43,14 +58,11 @@ def test_construct_molecule_from_adjacency_matrix(test_dir):
         assert (bond in mg_bonds or (bond[1], bond[0]) in mg_bonds)
 
 
-# TODO: add test with mapping pre-assigned
-# Also need to test `clean` option for dumping to JSON
-# Also also: need to test the graph hashing
 def test_prepare_reaction_for_input(molecules_1r1p, molecules_2r1p, molecules_2r2p):
     # Simple case: one reactant, one product
     # Test molecule graphs, and mapping
-    rcts_1r1p = [atoms_to_molecule_graph(molecules_1r1p["reactants"][0], charge=-1)]
-    pros_1r1p = [atoms_to_molecule_graph(molecules_1r1p["products"][0], charge=-1)]
+    rcts_1r1p = [atoms_to_molecule_graph(molecules_1r1p["reactants"][0], charge=-1, spin_multiplicity=1)]
+    pros_1r1p = [atoms_to_molecule_graph(molecules_1r1p["products"][0], charge=-1, spin_multiplicity=1)]
     inputs_1r1p = prepare_reaction_for_input(
         rcts_1r1p,
         pros_1r1p
@@ -65,7 +77,7 @@ def test_prepare_reaction_for_input(molecules_1r1p, molecules_2r1p, molecules_2r
     # More complicated case: two reactants, one product
     # Test charges, spins, mapping, reacting atoms
     rcts_2r1p = [
-        atoms_to_molecule_graph(molecules_2r1p["reactants"][0]),
+        atoms_to_molecule_graph(molecules_2r1p["reactants"][0], charge=0, spin_multiplicity=1),
         atoms_to_molecule_graph(molecules_2r1p["reactants"][1], charge=-1, spin_multiplicity=2)
     ]
     pros_2r1p = [
@@ -110,12 +122,12 @@ def test_prepare_reaction_for_input(molecules_1r1p, molecules_2r1p, molecules_2r
     # Yet more complicated: two reactants, two products
     # Test mapping, bonds breaking, bonds forming
     rcts_2r2p = [
-        atoms_to_molecule_graph(molecules_2r2p["reactants"][0]),
-        atoms_to_molecule_graph(molecules_2r2p["reactants"][1])
+        atoms_to_molecule_graph(molecules_2r2p["reactants"][0], charge=0, spin_multiplicity=1),
+        atoms_to_molecule_graph(molecules_2r2p["reactants"][1], charge=0, spin_multiplicity=1)
     ]
     pros_2r2p = [
-        atoms_to_molecule_graph(molecules_2r2p["products"][0]),
-        atoms_to_molecule_graph(molecules_2r2p["products"][1])
+        atoms_to_molecule_graph(molecules_2r2p["products"][0], charge=0, spin_multiplicity=1),
+        atoms_to_molecule_graph(molecules_2r2p["products"][1], charge=0, spin_multiplicity=1)
     ]
 
     inputs_2r2p = prepare_reaction_for_input(
@@ -151,7 +163,77 @@ def test_prepare_reaction_for_input(molecules_1r1p, molecules_2r1p, molecules_2r
     assert inputs_2r2p["bonds_breaking"] == [((0, 2), (0, 6)), ((0, 5), (0, 9))]
     assert inputs_2r2p["bonds_forming"] == [((1, 0), (0, 6)), ((1, 1), (0, 9))]
 
+    # Test pre-assigned atom mapping, label, and "clean" option
+    # Also test hashing
+    assigned_map = {
+        (0, 0): (0, 5),
+        (0, 1): (0, 2),
+        (0, 2): (0, 1),
+        (0, 3): (0, 3),
+        (0, 4): (0, 4),
+        (0, 5): (0, 0),
+        (0, 6): (0, 7),
+        (0, 7): (1, 2),
+        (0, 8): (0, 6),
+        (0, 9): (1, 3),
+        (1, 0): (1, 0),
+        (1, 1): (1, 1)
+    }
 
-# TODO: test for atoms_to_molecule_graph
-# TODO: test for data loading
-# TODO: test for oxygen_edge_extender
+    inputs_2r2p_assigned = prepare_reaction_for_input(
+        rcts_2r2p,
+        pros_2r2p,
+        mapping=assigned_map,
+        label="test",
+        clean=True
+    )
+
+    for k, v in inputs_2r2p_assigned["mapping"].items():
+        assert v == assigned_map[k]
+
+    assert inputs_2r2p_assigned["bonds_breaking"] == [((0, 2), (0, 7)), ((0, 5), (0, 9))]
+    assert inputs_2r2p_assigned["bonds_forming"] == [((1, 0), (0, 9)), ((1, 1), (0, 7))]
+
+    assert inputs_2r2p_assigned["label"] == "test"
+
+    assert isinstance(inputs_2r2p_assigned["reactants"][0], dict)
+
+    # Hashes should be the same regardless of if a map is assigned
+    assert sorted(inputs_2r2p_assigned["reactant_graph_hashes"]) == sorted(inputs_2r2p["reactant_graph_hashes"])
+    assert inputs_2r2p_assigned["reactant_graph_hashes"][0] == "176ba51f33c41703bc7ae8d746d124cd"
+
+
+def test_atoms_to_molecule_graph(graph_mol):
+    
+    atoms, mol = graph_mol
+
+    ref_mg = MoleculeGraph.with_local_env_strategy(mol, OpenBabelNN())
+    ref_mg = metal_edge_extender(ref_mg, **METAL_EDGE_EXTENDER_PARAMS)
+
+    mg = atoms_to_molecule_graph(atoms, charge=1, spin_multiplicity=1)
+    assert mg.molecule.charge == 1
+    assert mg.molecule.spin_multiplicity == 1
+    assert ref_mg.isomorphic_to(mg)
+    assert ref_mg == mg
+
+
+def test_oxygen_edge_extender(graph_mol):
+    
+    mol = graph_mol[1]
+
+    orig_mg = MoleculeGraph.with_local_env_strategy(mol, OpenBabelNN())
+    assert len(orig_mg.graph.edges(2)) == 3
+
+    # With too small cutoff, bond should not be detected
+    mg_smallcutoff = oxygen_edge_extender(orig_mg, carbon_cutoff=1.4)
+    assert len(mg_smallcutoff.graph.edges(2)) == 3
+
+    # With larger cutoff, bond will be detected
+    mg_largecutoff = oxygen_edge_extender(orig_mg, carbon_cutoff=1.7)
+    assert len(mg_largecutoff.graph.edges(2)) == 4
+
+
+def test_load_benchmark_data(test_dir):
+    
+    data = load_benchmark_data(test_dir / "elyte_ts_pf6.json")
+    assert len(data) == 24
