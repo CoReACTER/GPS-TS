@@ -126,7 +126,7 @@ def path_static_flow_orca(
 
 
 @requires(Sella, "Sella must be installed. Refer to the quacc documentation.")
-def path_static_flow_orca(
+def path_static_flow_qchem(
     path_points: List[Atoms],
     charge: int,
     spin_multiplicity: int,
