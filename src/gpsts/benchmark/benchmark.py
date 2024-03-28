@@ -69,10 +69,10 @@ def generate_benchmark_complexes(
                 reaction["reacting_atoms_products"],
                 reaction["bonds_breaking"],
                 reaction["bonds_forming"],
-                reaction["rct_charges"],
-                reaction["rct_spins"],
-                reaction["pro_charges"],
-                reaction["pro_spins"]
+                reactant_charges=reaction["rct_charges"],
+                reactant_spins=reaction["rct_spins"],
+                product_charges=reaction["pro_charges"],
+                product_spins=reaction["pro_spins"]
             )
             entrance_exit_complexes[reaction["label"]] = {
                 "entrance_complex": entrance_complex,

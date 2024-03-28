@@ -246,7 +246,7 @@ def prepare_reaction_for_input(
         )
 
         # Reformat mapping
-        #TODO: This is pretty inefficient (though much less costly than the MLIP)
+        #TODO: This is pretty inefficient (though much less costly than the MILP)
         # Should probably just rewrite the atom mapping code to have a better output format
         mapping = dict()
         for ir, rct in enumerate(rct_map_number):
