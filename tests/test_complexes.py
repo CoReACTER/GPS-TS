@@ -1,6 +1,6 @@
 import pytest
 
-from ase.io import read
+from ase.io import read, write
 
 from gpsts.complexes import select_central_molecule, make_complexes
 
@@ -36,10 +36,10 @@ def test_make_complexes_onerct_onepro(molecules_1r1p):
         rxn1_atoms_pro,
         rxn1_bonds_breaking,
         rxn1_bonds_forming,
-        rct_charges={0: -1},
-        rct_spins={0: 1},
-        pro_charges={0: -1},
-        pro_spins={0: 1},
+        reactant_charges={0: -1},
+        reactant_spins={0: 1},
+        product_charges={0: -1},
+        product_spins={0: 1},
     )
 
     # This algorithm is stochastic, so there's no guarantee that we'll get the same complex
@@ -74,10 +74,10 @@ def test_make_complexes_tworct_onepro(molecules_2r1p):
         rxn2_atoms_pro,
         rxn2_bonds_breaking,
         rxn2_bonds_forming,
-        rct_charges={0: 0, 1: -1},
-        rct_spins={0: 1, 1: 2},
-        pro_charges={0: -1},
-        pro_spins={0: 2},
+        reactant_charges={0: 0, 1: -1},
+        reactant_spins={0: 1, 1: 2},
+        product_charges={0: -1},
+        product_spins={0: 2},
     )
 
     assert rxn2_ent_comp.get_chemical_symbols() == rxn2_exit_comp.get_chemical_symbols()
@@ -150,4 +150,52 @@ def test_make_complexes_onerct_threepro(molecules_1r3p):
         rxn4_bonds_breaking,
         rxn4_bonds_forming
     )
+
+    assert rxn4_ent_comp.get_chemical_symbols() == rxn4_exit_comp.get_chemical_symbols()
     
+
+def test_make_complex_with_spectators(molecules_spec):
+
+    # Amide
+    rxn5_mapping = {
+        (0, i): (0, i)
+        for i in range(12)
+    }
+    # Hydroxide
+    rxn5_mapping[(1, 0)] = (0, 12)
+    rxn5_mapping[(1, 1)] = (0, 13)
+    # Water
+    rxn5_mapping[(2, 0)] = (1, 0)
+    rxn5_mapping[(2, 1)] = (1, 1)
+    rxn5_mapping[(2, 2)] = (1, 2)
+
+    rxn5_atoms_rct = {0: [1], 1: [0]}
+    rxn5_atoms_pro = {0: [1, 12]}
+
+    rxn5_bonds_breaking = list()
+    rxn5_bonds_forming = [((0, 1), (1, 0))]
+
+    # Spectator information
+    rxn5_spec_binding_rct = {2: (2, (1, 0))}
+    rxn5_spec_binding_pro = {1: (1, (0, 2))}
+
+    rxn5_ent_comp, rxn5_exit_comp = make_complexes(
+        molecules_spec["reactants"],
+        molecules_spec["products"],
+        rxn5_mapping,
+        rxn5_atoms_rct,
+        rxn5_atoms_pro,
+        rxn5_bonds_breaking,
+        rxn5_bonds_forming,
+        reactant_charges={0: 0, 1: -1, 2: 0},
+        reactant_spins={0: 1, 1: 1, 2: 1},
+        product_charges={0: -1, 1: 0},
+        product_spins={0: 1, 1: 1},
+        reactant_spectator_binding=rxn5_spec_binding_rct,
+        product_spectator_binding=rxn5_spec_binding_pro,
+    )
+
+    write("spec_entrance_complex.xyz", rxn5_ent_comp, format="xyz")
+    write("spec_exit_complex.xyz", rxn5_exit_comp, format="xyz")
+
+    assert rxn5_ent_comp.get_chemical_symbols() == rxn5_exit_comp.get_chemical_symbols()

@@ -96,10 +96,8 @@ def select_central_molecule(
     for ii, mol in enumerate(molecules):
         react_atoms = reacting_atoms.get(ii)
         if react_atoms is None:
-            raise ValueError("Need to provide list of reacting atoms for all molecules!"
-                             "Format of reacting_atoms: {i: [ind_1, ind_2,..., ind_n]},"
-                             "where 'i' is the 0-based index of the molecule in `molecules`"
-                             "and 'ind_n' is the nth reacting atom, again using 0-based indices")
+            # Spectator - not directly participating in the reaction
+            continue
 
         if central_index is None:
             central_index = ii
@@ -125,10 +123,12 @@ def make_complexes(
     reacting_atoms_products: Dict[int, List[int]],
     bonds_breaking: List[Tuple[Tuple[int, int], Tuple[int, int]]],
     bonds_forming: List[Tuple[Tuple[int, int], Tuple[int, int]]],
-    rct_charges: Dict[int, int] = dict(),
-    rct_spins: Dict[int, int] = dict(),
-    pro_charges: Dict[int, int] = dict(),
-    pro_spins: Dict[int, int] = dict(),
+    reactant_charges: Dict[int, int] = dict(),
+    reactant_spins: Dict[int, int] = dict(),
+    product_charges: Dict[int, int] = dict(),
+    product_spins: Dict[int, int] = dict(),
+    reactant_spectator_binding: Dict[int, Tuple[int, Tuple[int, int]]] = dict(),
+    product_spectator_binding: Dict[int, Tuple[int, Tuple[int, int]]] = dict(),
     reactant_core: Optional[int] = None,
     product_core: Optional[int] = None,
     architector_params: Dict = dict()
@@ -162,14 +162,30 @@ def make_complexes(
             reaction. This collection is formatted as ((mol_1_ind, atom_1_ind), (mol_2_ind, atom_2_ind)), where
             `mol_x_ind` is the 0-based index of the xth molecule in `reactants` and `atom_x_ind` is the 0-based index
             of the atom in the xth molecule that is involved in this bond
-        rct_charges (Dict[int, int]): Charges of the molecules in `reactants`. Keys are 0-based indexes of the
+        reactant_charges (Dict[int, int]): Charges of the molecules in `reactants`. Keys are 0-based indexes of the
             molecules in `reactants`, and values are integral charges
-        rct_spins (Dict[int, int]): Spin multiplicities of the molecules in `reactants`. Keys are 0-based indexes of
-            the molecules in `reactants`, and values are integral spin multiplicities
-        pro_charges (Dict[int, int]): Charges of the molecules in `products`. Keys are 0-based indexes of the
+        reactant_spins (Dict[int, int]): Spin multiplicities of the molecules in `reactants`. Keys are 0-based indexes
+            of the molecules in `reactants`, and values are integral spin multiplicities
+        product_charges (Dict[int, int]): Charges of the molecules in `products`. Keys are 0-based indexes of the
             molecules in `products`, and values are integral charges
-        pro_spins (Dict[int, int]): Spin multiplicities of the molecules in `products`. Keys are 0-based indexes of
+        product_spins (Dict[int, int]): Spin multiplicities of the molecules in `products`. Keys are 0-based indexes of
             the molecules in `products`, and values are integral spin multiplicities
+        reactant_spectator_binding (Dict[int, Tuple[int, Tuple[int, int]]]): Keys are indices of molecules in
+            `reactants` that are spectators (do not participate in any covalent or covalent-like bond breaking or bond
+            forming). Values take the format (spectator_atom_index, (binding_molecule_index, binding_atom_index)),
+            where `spectator_atom_index` is the index of the atom in the particular spectator molecule that should
+            be close to the atom `binding_atom_index` in the molecule in `reactants` with index
+            `binding_molecule_index`. Note that the binding molecule (`binding_molecule_index`) can be another
+            spectator or a molecule participating in the reaction, but it cannot be the same index as the key. Further
+            note that, for now, spectators must "bind" to reacting molecules. We hope to relax this requirement soon.
+        product_spectator_binding (Dict[int, Tuple[int, Tuple[int, int]]]): Keys are indices of molecules in
+            `products` that are spectators (do not participate in any covalent or covalent-like bond breaking or bond
+            forming). Values take the format (spectator_atom_index, (binding_molecule_index, binding_atom_index)),
+            where `spectator_atom_index` is the index of the atom in the particular spectator molecule that should
+            be close to the atom `binding_atom_index` in the molecule in `products` with index
+            `binding_molecule_index`. Note that the binding molecule (`binding_molecule_index`) can be another
+            spectator or a molecule participating in the reaction, but it cannot be the same index as the key. Further
+            note that, for now, spectators must "bind" to reacting molecules. We hope to relax this requirement soon.
         reactant_core (Optional[int] = None): Index of the molecule in `reactants` that will serve as the "core" of
             the entrance complex. Default is None, which means that this function will decide which molecule to use
             as the core.
@@ -197,8 +213,10 @@ def make_complexes(
         else:
             ratoms = convert_io_molecule(r)
 
-        ratoms.charge = int(rct_charges.get(ir, 0))
-        ratoms.uhf = int(rct_spins.get(ir, 1) - 1)
+        # TODO: this isn't guaranteed to provide a reasonable spin/charge pairing
+        # Default spin should really be the lowest spin possible with the molecule's charge
+        ratoms.charge = int(reactant_charges.get(ir, 0))
+        ratoms.uhf = int(reactant_spins.get(ir, 1) - 1)
         rcts.append(ratoms)
 
     pros = list()
@@ -209,8 +227,10 @@ def make_complexes(
         else:
             patoms = convert_io_molecule(p)
 
-        patoms.charge = int(pro_charges.get(ip, 0))
-        patoms.uhf = int(pro_spins.get(ip, 1) - 1)
+        # TODO: this isn't guaranteed to provide a reasonable spin/charge pairing
+        # Default spin should really be the lowest spin possible with the molecule's charge
+        patoms.charge = int(product_charges.get(ip, 0))
+        patoms.uhf = int(product_spins.get(ip, 1) - 1)
         pros.append(patoms)
 
     entrance_complexes = list()
@@ -228,6 +248,10 @@ def make_complexes(
     else:
         if reactant_core is None:
             central_index, central_mol = select_central_molecule(rcts, reacting_atoms_reactants)
+            if central_index is None:
+                raise ValueError("No reacting molecules that can act as complex cores! Check "
+                                 "`reacting_atoms_reactants` to ensure that at least one molecule is not behaving as "
+                                 "a spectator.")
         else:
             central_index = reactant_core
             central_mol = rcts[central_index]
@@ -243,6 +267,9 @@ def make_complexes(
             if ii == central_index:
                 continue
 
+            elif ii in reactant_spectator_binding:
+                continue
+
             possible_bonds = [
                 e
                 for e in bonds_breaking + bonds_forming
@@ -252,8 +279,9 @@ def make_complexes(
 
             if len(possible_bonds) == 0:
                 raise ValueError(f"Cannot add molecule {ii}; no place to bind on molecules {ordering}."
-                                 "Check `reacting_atoms_reactants`, `bonds_breaking`, and `bonds_forming`."
-                                 "If all variables are correct, try manually selecting a core.")
+                                 "Check `reacting_atoms_reactants`, `bonds_breaking`, `bonds_forming`, and "
+                                 "`reactant_spectator_binding`. If all variables are correct, try manually selecting "
+                                 "a core.")
 
             # For now, randomly select bond to focus on
             # TODO: Is there a better way to do this?
@@ -273,6 +301,20 @@ def make_complexes(
             for jj, kk in enumerate(range(len(internal_mapping_entrance), len(current_complex.ase_atoms))):
                 internal_mapping_entrance[(ii, jj)] = kk
         
+        # Now add spectators
+        for ii, loc_info in reactant_spectator_binding.items():
+            # No choices needed - just bring the spectator close to the specified atom in a molecule that's already in
+            # the complex
+            # TODO: should make sure that the target is actually in the complex already (i.e. that `loc_info[1]` is
+            # already in `internal_mapping_entrance`)
+            binding = make_complex(current_complex, rcts[ii], internal_mapping_entrance[loc_info[1]], loc_info[0])
+
+            # Bookkeeping
+            ordering.append(ii)
+            current_complex = binding[0]
+            for jj, kk in enumerate(range(len(internal_mapping_entrance), len(current_complex.ase_atoms))):
+                internal_mapping_entrance[(ii, jj)] = kk
+
         entrance_complex = current_complex
         new_mapping = dict()
         for key, value in mapping.items():
@@ -302,6 +344,10 @@ def make_complexes(
     else:
         if product_core is None:
             central_index, central_mol = select_central_molecule(pros, reacting_atoms_products)
+            if central_index is None:
+                raise ValueError("No reacting molecules that can act as complex cores! Check "
+                                 "`reacting_atoms_products` to ensure that at least one molecule is not behaving as "
+                                 "a spectator.")
         else:
             central_index = reactant_core
             central_mol = pros[central_index]
@@ -315,6 +361,9 @@ def make_complexes(
             if ii == central_index:
                 continue
 
+            elif ii in product_spectator_binding:
+                continue
+
             possible_bonds = [
                 (mapping[e[0]], mapping[e[1]])
                 for e in bonds_breaking + bonds_forming
@@ -324,8 +373,9 @@ def make_complexes(
 
             if len(possible_bonds) == 0:
                 raise ValueError(f"Cannot add molecule {ii}; no place to bind on molecules {ordering}."
-                                 "Check `reacting_atoms_products`, `bonds_breaking`, and `bonds_forming`."
-                                 "If all variables are correct, try manually selecting a core.")
+                                 "Check `reacting_atoms_products`, `bonds_breaking`, `bonds_forming`, and "
+                                 "`product_spectator_binding`. If all variables are correct, try manually selecting "
+                                 "a core.")
 
             # For now, randomly select bond to focus on
             # TODO: Is there a better way to do this?
@@ -338,6 +388,20 @@ def make_complexes(
                 reacting_atom_other = bond[0][1]
 
             binding = make_complex(current_complex, pro, reacting_atom_core, reacting_atom_other, params=architector_params)
+
+            # Bookkeeping
+            ordering.append(ii)
+            current_complex = binding[0]
+            for jj, kk in enumerate(range(len(internal_mapping_exit), len(current_complex.ase_atoms))):
+                internal_mapping_exit[(ii, jj)] = kk
+
+        # Now add spectators
+        for ii, loc_info in product_spectator_binding.items():
+            # No choices needed - just bring the spectator close to the specified atom in a molecule that's already in
+            # the complex
+            # TODO: should make sure that the target is actually in the complex already (i.e. that `loc_info[1]` is
+            # already in `internal_mapping_entrance`)
+            binding = make_complex(current_complex, pros[ii], internal_mapping_exit[loc_info[1]], loc_info[0])
 
             # Bookkeeping
             ordering.append(ii)
